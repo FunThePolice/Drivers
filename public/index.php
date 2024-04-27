@@ -1,10 +1,8 @@
 <?php
 
-use App\Builder\Builder;
-use App\Database\Config;
-use App\Database\Connection;
-use App\Database\Drivers\DriverWrapper;
 use App\Helpers\MySessionHelper;
+use App\Model\Profile;
+use App\Model\User;
 use App\Repositories\ProfileRepository;
 use App\Repositories\UserRepository;
 use App\Services\UserService;
@@ -13,19 +11,12 @@ require __DIR__.'/../vendor/autoload.php';
 
 session_start();
 
-$config = new Config('localhost',3306,'users','root','');
-$connection = (new Connection($config,new DriverWrapper()))->pdoConnect();
-$builder = new Builder($connection);
 $serv = new UserService(
-    new UserRepository($builder),
-    new ProfileRepository($builder)
+    new UserRepository(new User()),
+    new ProfileRepository(new Profile())
 );
-//$_POST = [
-//    'name' => 'qqq',
-//    'email' => 'qqq@qq.com',
-//    'password' => '123456',
-//];
 
+$mySession = new MySessionHelper();
 
 $request = $_SERVER['REQUEST_URI'];
 
@@ -61,6 +52,7 @@ switch ($request) {
         http_response_code(404);
         require __DIR__ . '/views/404.php';
         break;
+
 }
 
 

@@ -3,19 +3,44 @@
 namespace App\Model;
 
 use App\Builder\Builder;
+use App\Database\Config;
+use App\Database\Connection;
+use App\Database\Drivers\DriverWrapper;
+use App\Helpers\MyConfigHelper;
 
 class BaseModel
 {
-    protected string $table;
+
+    protected static string $table;
+
     protected array $fillable;
+
+    protected Builder $builder;
 
     public function __construct()
     {
-
+        $this->builder = $this->getBuilder();
     }
-    public function getTable(): string
+
+    public function getBuilder(): Builder
     {
-        return $this->table;
+        $configHelper = MyConfigHelper::getConfig();
+
+        $config = new Config(
+            $configHelper['host'],
+            $configHelper['port'],
+            $configHelper['database'],
+            $configHelper['username'],
+            $configHelper['password']
+        );
+
+        $connection = (new Connection($config, new DriverWrapper()))->connect($configHelper['driver']);
+        return new Builder($connection);
+    }
+
+    public static function getTable(): string
+    {
+        return static::$table;
     }
 
     public function toArray(): array
@@ -34,13 +59,35 @@ class BaseModel
                     if (is_callable(BaseModel::class, $mutator)) {
                         $this->{$mutator}($value);
                     }
-
                 }
             }
         }
-
         return $this;
     }
 
+    public function save(): void
+    {
+        $this->builder->create($this::getTable(), $this->toArray());
+    }
+
+    public function all(): array
+    {
+        return $this->builder->read($this::getTable());
+    }
+
+    public function find(array $condition): bool|array|null
+    {
+        return $this->builder->readWhere($this::getTable(), $condition);
+    }
+
+    public function update(array $condition): void
+    {
+        $this->builder->update($this::getTable(), $this->toArray(), $condition);
+    }
+
+    public function delete(array $condition): void
+    {
+        $this->builder->delete($this::getTable(), $condition);
+    }
 
 }

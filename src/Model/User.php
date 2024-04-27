@@ -2,16 +2,20 @@
 
 namespace App\Model;
 
-
 class User extends BaseModel
 {
-    protected string $table = 'users';
+
+    protected static string $table = 'users';
 
     protected array $fillable = ['name', 'email', 'password'];
-    public string $name;
-    public string $email;
-    public string $password;
 
+    protected string|int $id;
+
+    public string $name;
+
+    public string $email;
+
+    public string $password;
 
     public function toArray(): array
     {
@@ -21,15 +25,18 @@ class User extends BaseModel
             'password' => $this->password,
         ];
     }
-    public function setId(string $id): void
+
+    public function setId(int|string $id)
     {
         $this->id = $id;
+        return $this;
     }
 
-    public function getId(): string
+    public function getId(): string|int
     {
         return $this->id;
     }
+
     public function setName(string $name): void
     {
         $this->name = ucfirst($name);
@@ -49,9 +56,10 @@ class User extends BaseModel
     {
         return $this->email;
     }
+
     public function setPassword(string $password): void
     {
-        $this->password = password_hash($password, PASSWORD_DEFAULT);
+        $this->password = $password;
     }
 
     public function getPassword(): string
@@ -59,4 +67,4 @@ class User extends BaseModel
         return $this->password;
     }
 
-    }
+}

@@ -4,20 +4,26 @@ namespace App\Database;
 
 class Config
 {
+
     private string $host;
+
     private int $port;
+
     private string $database;
+
     private string $userName;
+
     private string $password;
 
-    public function __construct($host,$port,$database,$userName,$password)
-    {
-        $this->setHost($host);
-        $this->setPort($port);
-        $this->setDatabase($database);
-        $this->setUserName($userName);
-        $this->setPassword($password);
+    private static string $charset = 'utf8mb4';
 
+    public function __construct(string $host, int $port, string $database, string $userName, string $password)
+    {
+        $this->setHost($host)
+            ->setPort($port)
+            ->setDatabase($database)
+            ->setUserName($userName)
+            ->setPassword($password);
     }
 
     public function getHost(): string
@@ -25,9 +31,10 @@ class Config
         return $this->host;
     }
 
-    public function setHost(string $host): void
+    public function setHost(string $host): Config
     {
         $this->host = $host;
+        return $this;
     }
 
     public function getPort(): int
@@ -35,9 +42,10 @@ class Config
         return $this->port;
     }
 
-    public function setPort(int $port): void
+    public function setPort(int $port): Config
     {
         $this->port = $port;
+        return $this;
     }
 
     public function getDatabase(): string
@@ -45,9 +53,10 @@ class Config
         return $this->database;
     }
 
-    public function setDatabase(string $database): void
+    public function setDatabase(string $database): Config
     {
         $this->database = $database;
+        return $this;
     }
 
     public function getUserName(): string
@@ -55,9 +64,10 @@ class Config
         return $this->userName;
     }
 
-    public function setUserName(string $userName): void
+    public function setUserName(string $userName): Config
     {
         $this->userName = $userName;
+        return $this;
     }
 
     public function getPassword(): string
@@ -65,14 +75,15 @@ class Config
         return $this->password;
     }
 
-    public function setPassword(string $password): void
+    public function setPassword(string $password): Config
     {
         $this->password = $password;
+        return $this;
     }
 
-    public function getCharset()
+    public static function getCharset(): string
     {
-        return $this->charset ?? 'utf8mb4';
+        return static::$charset;
     }
 
 }

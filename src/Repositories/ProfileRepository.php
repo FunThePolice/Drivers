@@ -2,22 +2,25 @@
 
 namespace App\Repositories;
 
-use App\Builder\Builder;
 use App\Model\Profile;
 
 class ProfileRepository
 {
-    private Builder $builder;
 
-    public function __construct(Builder $builder)
+    private Profile $profile;
+
+    public function __construct(Profile $profile)
     {
-        $this->builder = $builder;
+        $this->profile = $profile;
     }
 
-    public function create(array $data): bool|array|null
+    public function create(int $userId): Profile
     {
-        $profile = (new Profile())->fill(['userId' => $data['id']]);
-        $this->builder->create($profile->getTable(), $profile->toArray());
-        return $this->builder->get('profiles','userId', $data['id']);
+        $this->profile
+            ->fill(['settings' => 'settings'])
+            ->setUser_id($userId)
+            ->save();
+        return $this->profile;
     }
+
 }

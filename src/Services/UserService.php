@@ -9,6 +9,7 @@ class UserService
 {
 
     private UserRepository $userRepository;
+
     private ProfileRepository $profileRepository;
 
     public function __construct(UserRepository $userRepository, ProfileRepository $profileRepository)
@@ -16,34 +17,34 @@ class UserService
         $this->userRepository = $userRepository;
         $this->profileRepository = $profileRepository;
     }
+
     public function createUser(array $data): array
     {
         $user = $this->userRepository->create($data);
-        $profile = $this->profileRepository->create($user);
+        $profile = $this->profileRepository->create($user->getId());
+        $viewUserId = $this->userRepository->uuidGen();
+        $user->setId($viewUserId);
+        $profile->setUser_id($viewUserId);
         return compact('user','profile');
-    }
-
-    public function checkIfExist(string $name): bool
-    {
-        return $this->userRepository->existsByName($name);
-    }
-
-    public function verifyName(array $data): bool
-    {
-        return $this->checkIfExist($data['name']);
-    }
-
-    public function verifyPassword(array $data, array $password): bool
-    {
-        return password_verify($data['password'], $password['Password']);
     }
 
     public function verifyUser(array $data): bool
     {
-        if ($this->verifyName($data)) {
+        if ($this->checkIfUserExist($data)) {
             $user = $this->userRepository->getByName($data['name']);
         }
-        return $this->verifyPassword($data, $user);
+
+        if (password_verify($data['password'], $user->getPassword())) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public function checkIfUserExist(array $data): bool
+    {
+       return $this->userRepository->existsByName($data['name']);
     }
 
 }

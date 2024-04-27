@@ -3,26 +3,34 @@
 namespace App\Database\Drivers\PDO;
 
 use App\Database\Config;
-use App\Database\Connection;
 use App\Database\Drivers\Contracts\IDriver;
 use App\Database\Drivers\DriverWrapper;
 use PDO;
 
-class PdoDriver extends Connection implements IDriver
+class PdoDriver implements IDriver
 {
-    private $db;
-    protected DriverWrapper $wrapper;
+
+    private PDO $db;
+
+    private DriverWrapper $wrapper;
+
+    private Config $config;
 
     public function __construct(Config $config, DriverWrapper $wrapper)
     {
-        parent::__construct($config,$wrapper);
+        $this->config = $config;
+        $this->wrapper = $wrapper;
         $this->db = $this->connect();
     }
+
     public function connect(): PDO
     {
-        $dsn = "mysql:host=". $this->config->getHost() .
-            ";dbname=". $this->config->getDatabase() .
-            ";charset=". $this->config->getCharset();
+        $dsn = sprintf(
+            'mysql:host=%s;dbname=%s;charset=%s',
+                    $this->config->getHost(),
+                    $this->config->getDatabase(),
+                    $this->config::getCharset()
+        );
 
         $opt = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -31,55 +39,67 @@ class PdoDriver extends Connection implements IDriver
         ];
 
         return new PDO($dsn, $this->config->getUserName(), $this->config->getPassword(), $opt);
-
-    }
-
-    public function disconnect($db): void
-    {
-        $this->db = null;
     }
 
     public function create(string $table, array $data): void
     {
         $this->wrapper->prepareDataForInsert($data);
-        $stmt = $this->db->prepare("INSERT INTO $table (" .
-            $this->wrapper->getFields() . ") VALUES (" .
-            $this->wrapper->getPlaceholders() . ")");
+
+        $stmt = $this->db->prepare(sprintf(
+            'INSERT INTO %s (%s) VALUES (%s)',
+            $table,
+            $this->wrapper->getFields(),
+            $this->wrapper->getPlaceholders()
+        ));
         $stmt->execute($this->wrapper->getParams());
     }
 
-    public function read(string $table, string $condition, string $value): array|bool
+    public function readWhere(string $table, array $condition): array|bool
     {
-        $stmt = $this->db->prepare("SELECT * FROM $table WHERE  $condition = ?");
-        $stmt->execute([$value]);
+        $this->wrapper->prepareDataForSelect($condition);
+
+        $stmt = $this->db->prepare(sprintf(
+            'SELECT * FROM %s WHERE %s LIMIT 1',
+            $table,
+            $this->wrapper->getColumn()
+        ));
+        $stmt->execute($this->wrapper->getParams());
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function update(string $table, array $data, array $condition): void
     {
         $this->wrapper->prepareDataForUpdate($data, $condition);
-        $stmt = $this->db->prepare("UPDATE $table SET " .
-            $this->wrapper->getFields() . " WHERE " .
-            $this->wrapper->getColumn() ." ");
-        $stmt->execute(...$this->wrapper->getParams());
+
+        $stmt = $this->db->prepare(sprintf(
+            'UPDATE %s SET %s WHERE %s = ? LIMIT 1',
+            $table,
+            $this->wrapper->getFields(),
+            $this->wrapper->getColumn()
+        ));
+        $stmt->execute($this->wrapper->getParams());
     }
 
-    public function delete(string $table, string $condition, string $value): void
+    public function delete(string $table, array $condition): void
     {
-        $stmt = $this->db->prepare("DELETE FROM $table WHERE $condition = ?");
-        $stmt->execute([$value]);
+        $this->wrapper->prepareDataForSelect($condition);
+
+        $stmt = $this->db->prepare(sprintf(
+            'DELETE FROM %s WHERE %s LIMIT 1',
+            $table,
+            $this->wrapper->getColumn()
+        ));
+        $stmt->execute($this->wrapper->getParams());
     }
 
-    public function readAll(string $table): array
+    public function read(string $table): array
     {
-        $stmt = $this->db->prepare("SELECT * FROM $table");
+        $stmt = $this->db->prepare(sprintf(
+            'SELECT * FROM %s',
+            $table
+        ));
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function deleteAll(string $table): void
-    {
-        $stmt = $this->db->prepare("DELETE FROM $table");
-        $stmt->execute();
-    }
 }

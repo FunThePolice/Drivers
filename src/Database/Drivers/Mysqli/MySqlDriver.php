@@ -3,19 +3,23 @@
 namespace App\Database\Drivers\Mysqli;
 
 use App\Database\Config;
-use App\Database\Connection;
 use App\Database\Drivers\Contracts\IDriver;
 use App\Database\Drivers\DriverWrapper;
 use mysqli;
 
-class MySqlDriver extends Connection implements IDriver
-
+class MySqlDriver implements IDriver
 {
+
     private mysqli $db;
+
     protected DriverWrapper $wrapper;
+
+    private Config $config;
+
     public function __construct(Config $config, DriverWrapper $wrapper)
     {
-        parent::__construct($config,$wrapper);
+        $this->config = $config;
+        $this->wrapper = $wrapper;
         $this->db = $this->connect();
     }
 
@@ -37,54 +41,67 @@ class MySqlDriver extends Connection implements IDriver
        return $db;
    }
 
-    public function disconnect($db): void
-    {
-        $db->close();
-    }
-
     public function create(string $table, array $data): void
     {
         $this->wrapper->prepareDataForInsert($data);
-        $stmt = $this->db->prepare("INSERT INTO $table (" .
-            $this->wrapper->getFields() . ") VALUES (" .
-            $this->wrapper->getPlaceholders() . ")");
-        $stmt->execute(...$this->wrapper->getParams());
+
+        $stmt = $this->db->prepare(sprintf(
+            'INSERT INTO %s (%s) VALUES (%s)',
+            $table,
+            $this->wrapper->getFields(),
+            $this->wrapper->getPlaceholders()
+        ));
+        $stmt->execute($this->wrapper->getParams());
     }
 
-    public function read(string $table, string $condition, string $value): array
+    public function readWhere(string $table, array $condition): array|bool|null
     {
-        $stmt = $this->db->prepare("SELECT * FROM $table WHERE  $condition = ?");
-        $stmt->execute([$value]);
+        $this->wrapper->prepareDataForSelect($condition);
+
+        $stmt = $this->db->prepare(sprintf(
+            'SELECT * FROM %s WHERE %s LIMIT 1',
+            $table,
+            $this->wrapper->getColumn()
+        ));
+        $stmt->execute($this->wrapper->getParams());
         $result = $stmt->get_result();
         return $result->fetch_assoc();
     }
 
-    public function readAll(string $table): array
+    public function read(string $table): array
     {
-        $stmt = $this->db->prepare("SELECT * FROM $table");
+        $stmt = $this->db->prepare(sprintf(
+            'SELECT * FROM %s',
+            $table
+        ));
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     public function update(string $table, array $data, array $condition): void
     {
         $this->wrapper->prepareDataForUpdate($data, $condition);
-        $stmt = $this->db->prepare("UPDATE $table SET " .
-            $this->wrapper->getFields() . " WHERE " .
-            $this->wrapper->getColumn() ." ");
-        $stmt->execute(...$this->wrapper->getParams());
+
+        $stmt = $this->db->prepare(sprintf(
+            'UPDATE %s SET %s WHERE %s LIMIT 1',
+            $table,
+            $this->wrapper->getFields(),
+            $this->wrapper->getColumn()
+        ));
+        $stmt->execute($this->wrapper->getParams());
     }
 
-    public function delete(string $table, string $condition, string $value): void
+    public function delete(string $table, array $condition): void
     {
-        $stmt = $this->db->prepare("DELETE FROM $table WHERE $condition = ?");
-        $stmt->execute([$value]);
+        $this->wrapper->prepareDataForSelect($condition);
+
+        $stmt = $this->db->prepare(sprintf(
+            'DELETE FROM %s WHERE %s LIMIT 1',
+            $table,
+            $this->wrapper->getColumn()
+        ));
+        $stmt->execute($this->wrapper->getParams());
     }
 
-    public function deleteAll(string $table): void
-    {
-        $stmt = $this->db->prepare("DELETE FROM $table");
-        $stmt->execute();
-    }
 }

@@ -2,60 +2,59 @@
 
 namespace App\Repositories;
 
-use App\Builder\Builder;
 use App\Model\User;
 
 class UserRepository
 {
-    private Builder $builder;
 
-    public function __construct(Builder $builder)
-    {
-        $this->builder = $builder;
+    private User $user;
 
-    }
-    public function create(array $data): array|null
+    public function __construct(User $user)
     {
-        $user = (new User())->fill($data);
-        $id = $this->generateId($user);
-        $this->builder->create($user->getTable(), array_merge(['id' => $id], $user->toArray()));
-        return $this->builder->getById($user->getTable(),$id);
+        $this->user = $user;
     }
 
-    public function getByName(string $name): array|bool
+    public function create(array $data): User
     {
-        return $this->builder->get('users', 'name', $name);
+        $data['password'] = $this->hashPassword($data['password']);
+        $this->user->fill($data)->save();
+        return $this->getByName($data['name']);
     }
+
+    public function fillUserFromDb(array $dbData): User
+    {
+        return $this->user->fill($dbData)->setId($dbData['id']);
+    }
+
+    public function getByName(string $name): User
+    {
+        $dbData = $this->user->find(['name' => ucfirst($name)]);
+        return $this->fillUserFromDb($dbData);
+    }
+
     public function existsByName(string $param): bool
     {
-        return $this->builder->exist('users','name',$param);
+        if ($this->user->find(['name' => $param])) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public function generateId(User $user): string
+    public function hashPassword(string $password): string
     {
-        $id = $this->uuidGen();
-
-        while ($this->builder->exist($user->getTable(),'id',$id)){
-            $id = $this->uuidGen();
-            break;
-        }
-
-        return $id;
+        return password_hash($password, PASSWORD_DEFAULT);
     }
 
     public function uuidGen()
     {
         $data = $data ?? random_bytes(16);
-        assert(strlen($data) == 16);
+        assert(strlen($data) === 16);
 
         $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
         $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
 
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+        return vsprintf('%s%s', str_split(bin2hex($data), 4));
     }
 
-    public function getBuilder(): Builder
-    {
-        return $this->builder;
-    }
 }

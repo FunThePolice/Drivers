@@ -6,6 +6,7 @@ use App\Database\Drivers\Contracts\IDriver;
 
 class Builder
 {
+
     private IDriver $connection;
 
     public function __construct(IDriver $connection)
@@ -18,19 +19,14 @@ class Builder
         $this->connection->create($tableName, $data);
     }
 
-    public function getAll(string $tableName): array
+    public function read(string $tableName): array
     {
-        return $this->connection->readAll($tableName);
+        return $this->connection->read($tableName);
     }
 
-    public function getById(string $tableName, string $id): array|null
+    public function readWhere(string $tableName, array $condition): bool|array|null
     {
-       return $this->connection->read($tableName,'id',$id);
-    }
-
-    public function get(string $tableName, string $condition, string $value): bool|array|null
-    {
-        return $this->connection->read($tableName,$condition,$value);
+        return $this->connection->readWhere($tableName,$condition);
     }
 
     public function update(string $tableName, array $data, array $condition): void
@@ -38,33 +34,9 @@ class Builder
         $this->connection->update($tableName,$data,$condition);
     }
 
-    public function updateById(string $tableName, array $data, string $id): void
+    public function delete(string $tableName, array $condition): void
     {
-        $this->connection->update($tableName,$data,['id' => $id]);
-    }
-    public function deleteAll(string $tableName): void
-    {
-        $this->connection->deleteAll($tableName);
-    }
-
-    public function deleteById(string $tableName, int $id): void
-    {
-        $this->connection->delete($tableName, 'id', $id);
-    }
-
-    public function delete(string $tableName, string $condition, string $value): void
-    {
-        $this->connection->delete($tableName,$condition,$value);
-    }
-
-    public function exist(string $tableName, string $condition, string $value): bool
-    {
-
-        if ($this->get($tableName,$condition,$value)) {
-            return true;
-        } else {
-            return false;
-        }
+        $this->connection->delete($tableName,$condition);
     }
 
 }
