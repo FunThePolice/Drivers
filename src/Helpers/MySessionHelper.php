@@ -20,7 +20,7 @@ class MySessionHelper
     public function setSessionKey($session, $key, $value): array
     {
         $session[$key] = $value;
-        return $session;
+        return $session ?? [];
     }
 
 }

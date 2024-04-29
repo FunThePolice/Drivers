@@ -15,24 +15,16 @@ class BaseModel
 
     protected array $fillable;
 
-    protected Builder $builder;
-
-    public function __construct()
-    {
-        $this->builder = $this->getBuilder();
-    }
-
     public function getBuilder(): Builder
     {
         $configHelper = MyConfigHelper::getConfig();
 
-        $config = new Config(
-            $configHelper['host'],
-            $configHelper['port'],
-            $configHelper['database'],
-            $configHelper['username'],
-            $configHelper['password']
-        );
+        $config = (new Config())
+            ->setHost($configHelper['host'])
+            ->setPort($configHelper['port'])
+            ->setDatabase($configHelper['database'])
+            ->setUserName($configHelper['username'])
+            ->setPassword($configHelper['password']);
 
         $connection = (new Connection($config, new DriverWrapper()))->connect($configHelper['driver']);
         return new Builder($connection);
@@ -67,27 +59,27 @@ class BaseModel
 
     public function save(): void
     {
-        $this->builder->create($this::getTable(), $this->toArray());
+        $this->getBuilder()->create(static::getTable(), $this->toArray());
     }
 
     public function all(): array
     {
-        return $this->builder->read($this::getTable());
+        return $this->getBuilder()->read(static::getTable());
     }
 
     public function find(array $condition): bool|array|null
     {
-        return $this->builder->readWhere($this::getTable(), $condition);
+        return $this->getBuilder()->readWhere(static::getTable(), $condition);
     }
 
     public function update(array $condition): void
     {
-        $this->builder->update($this::getTable(), $this->toArray(), $condition);
+        $this->getBuilder()->update(static::getTable(), $this->toArray(), $condition);
     }
 
     public function delete(array $condition): void
     {
-        $this->builder->delete($this::getTable(), $condition);
+        $this->getBuilder()->delete(static::getTable(), $condition);
     }
 
 }

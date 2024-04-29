@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Helpers\MyPasswordHelper;
+use App\Helpers\MyUuidHelper;
 use App\Repositories\ProfileRepository;
 use App\Repositories\UserRepository;
 
@@ -22,19 +24,19 @@ class UserService
     {
         $user = $this->userRepository->create($data);
         $profile = $this->profileRepository->create($user->getId());
-        $viewUserId = $this->userRepository->uuidGen();
+        $viewUserId = MyUuidHelper::uuidGen();
         $user->setId($viewUserId);
-        $profile->setUser_id($viewUserId);
+        $profile->setUserId($viewUserId);
         return compact('user','profile');
     }
 
     public function verifyUser(array $data): bool
     {
-        if ($this->checkIfUserExist($data)) {
+        if ($this->isUserNameExist($data)) {
             $user = $this->userRepository->getByName($data['name']);
         }
 
-        if (password_verify($data['password'], $user->getPassword())) {
+        if (MyPasswordHelper::verifyPassword($data['password'], $user->getPassword())) {
             return true;
         } else {
             return false;
@@ -42,7 +44,7 @@ class UserService
 
     }
 
-    public function checkIfUserExist(array $data): bool
+    public function isUserNameExist(array $data): bool
     {
        return $this->userRepository->existsByName($data['name']);
     }

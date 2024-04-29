@@ -31,13 +31,13 @@ class Profile extends BaseModel
         return $this->settings;
     }
 
-    public function setUser_id(int|string $userId)
+    public function setUserId(int|string $userId)
     {
         $this->user_id = $userId;
         return $this;
     }
 
-    public function getUser_Id(): int
+    public function getUserId(): int
     {
         return $this->user_id;
     }

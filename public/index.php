@@ -1,8 +1,6 @@
 <?php
 
 use App\Helpers\MySessionHelper;
-use App\Model\Profile;
-use App\Model\User;
 use App\Repositories\ProfileRepository;
 use App\Repositories\UserRepository;
 use App\Services\UserService;
@@ -12,8 +10,8 @@ require __DIR__.'/../vendor/autoload.php';
 session_start();
 
 $serv = new UserService(
-    new UserRepository(new User()),
-    new ProfileRepository(new Profile())
+    new UserRepository(),
+    new ProfileRepository()
 );
 
 $mySession = new MySessionHelper();
