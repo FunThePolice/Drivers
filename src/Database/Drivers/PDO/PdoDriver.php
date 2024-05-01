@@ -23,6 +23,11 @@ class PdoDriver implements IDriver
         $this->db = $this->connect();
     }
 
+    public static function establish(Config $config, DriverWrapper $wrapper): PdoDriver
+    {
+    return new self($config, $wrapper);
+    }
+
     public function connect(): PDO
     {
         $dsn = sprintf(

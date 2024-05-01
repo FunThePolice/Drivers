@@ -4,7 +4,6 @@ namespace App\Model;
 
 use App\Builder\Builder;
 use App\Database\Config;
-use App\Database\Connection;
 use App\Database\Drivers\DriverWrapper;
 use App\Helpers\MyConfigHelper;
 
@@ -26,7 +25,7 @@ class BaseModel
             ->setUserName($configHelper['username'])
             ->setPassword($configHelper['password']);
 
-        $connection = (new Connection($config, new DriverWrapper()))->connect($configHelper['driver']);
+        $connection = $configHelper['driver']::establish($config, new DriverWrapper());
         return new Builder($connection);
     }
 
