@@ -9,7 +9,7 @@ class Profile extends BaseModel
 
     protected array $fillable = ['settings'];
 
-    public int|string $user_id;
+    public int|string $userId;
 
     public string $settings = 'settings';
 
@@ -17,7 +17,7 @@ class Profile extends BaseModel
     {
         return [
             'settings' => $this->settings,
-            'user_id' => $this->user_id,
+            'user_id' => $this->userId,
         ];
     }
 
@@ -33,13 +33,13 @@ class Profile extends BaseModel
 
     public function setUserId(int|string $userId)
     {
-        $this->user_id = $userId;
+        $this->userId = $userId;
         return $this;
     }
 
     public function getUserId(): int
     {
-        return $this->user_id;
+        return $this->userId;
     }
 
 }
