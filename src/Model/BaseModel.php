@@ -3,8 +3,7 @@
 namespace App\Model;
 
 use App\Builder\Builder;
-use App\Database\Config;
-use App\Database\Drivers\DriverWrapper;
+use App\Factories\DriverFactory;
 use App\Helpers\MyConfigHelper;
 
 abstract class BaseModel
@@ -17,15 +16,7 @@ abstract class BaseModel
     public function getBuilder(): Builder
     {
         $configHelper = MyConfigHelper::getConfig();
-
-        $config = (new Config())
-            ->setHost($configHelper['host'])
-            ->setPort($configHelper['port'])
-            ->setDatabase($configHelper['database'])
-            ->setUserName($configHelper['username'])
-            ->setPassword($configHelper['password']);
-
-        $connection = $configHelper['driver']::establish($config, new DriverWrapper());
+        $connection = DriverFactory::create($configHelper['driver']);
         return new Builder($connection);
     }
 

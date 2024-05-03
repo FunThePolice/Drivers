@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Helpers\MyUuidHelper;
 use App\Model\User;
 use App\Repositories\ProfileRepository;
 use App\Repositories\UserRepository;
