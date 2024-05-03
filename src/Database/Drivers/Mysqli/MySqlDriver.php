@@ -23,11 +23,6 @@ class MySqlDriver implements IDriver
         $this->db = $this->connect();
     }
 
-    public static function establish(Config $config, DriverWrapper $wrapper): MySqlDriver
-    {
-        return new self($config, $wrapper);
-    }
-
     public function connect(): mysqli
    {
        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);

@@ -7,5 +7,3 @@ if (!$serv->isUserNameExist($_POST)) {
 } else {
     header('location: /registration');
 }
-
-

@@ -6,4 +6,3 @@ if ($serv->verifyUser($_POST)) {
 } else {
     header('Location: /signIn');
 }
-
