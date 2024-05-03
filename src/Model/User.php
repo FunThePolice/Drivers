@@ -9,7 +9,7 @@ class User extends BaseModel
 
     protected array $fillable = ['name', 'email', 'password'];
 
-    protected string|int $id;
+    protected int $id;
 
     public string $name;
 
@@ -26,13 +26,13 @@ class User extends BaseModel
         ];
     }
 
-    public function setId(int|string $id)
+    public function setId(int $id): User
     {
         $this->id = $id;
         return $this;
     }
 
-    public function getId(): string|int
+    public function getId(): int
     {
         return $this->id;
     }

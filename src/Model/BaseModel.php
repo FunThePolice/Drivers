@@ -7,7 +7,7 @@ use App\Database\Config;
 use App\Database\Drivers\DriverWrapper;
 use App\Helpers\MyConfigHelper;
 
-class BaseModel
+abstract class BaseModel
 {
 
     protected static string $table;
@@ -46,6 +46,7 @@ class BaseModel
                 $this->{$key} = $value;
             } else {
                 if (in_array($key, $this->fillable)) {
+                    $key = \lcfirst(\str_replace('_', '', \ucwords($key, '_')));
                     $mutator = sprintf('set%s', ucfirst($key));
                     if (is_callable(BaseModel::class, $mutator)) {
                         $this->{$mutator}($value);
@@ -66,9 +67,15 @@ class BaseModel
         return $this->getBuilder()->read(static::getTable());
     }
 
-    public function find(array $condition): bool|array|null
+    public function find(array $condition): BaseModel|bool
     {
-        return $this->getBuilder()->readWhere(static::getTable(), $condition);
+       $dbData = $this->getBuilder()->readWhere(static::getTable(), $condition);
+
+       if ($dbData === null) {
+           return false;
+       }
+
+       return (new static())->fill($dbData)->setId($dbData['id']);
     }
 
     public function update(array $condition): void

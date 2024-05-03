@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Model\BaseModel;
 use App\Model\User;
 use App\Services\PasswordService;
 
@@ -12,27 +13,19 @@ class UserRepository
     {
         $data['password'] = PasswordService::hashPassword($data['password']);
         (new User())->fill($data)->save();
-        return $this->getByName($data['name']);
+        /** @var User $user */
+        $user = $this->getByKey('name', $data['name']);
+        return $user;
     }
 
-    private function fillUserFromDb(array $dbData): User
+    public function getByKey(string $key , string $value): BaseModel
     {
-        return (new User())->fill($dbData)->setId($dbData['id']);
-    }
-
-    public function getByName(string $name): User
-    {
-        $dbData = (new User())->find(['name' => ucfirst($name)]);
-        return $this->fillUserFromDb($dbData);
+        return (new User())->find([$key => $value]);
     }
 
     public function existsByName(string $param): bool
     {
-        if ((new User())->find(['name' => $param])) {
-            return true;
-        } else {
-            return false;
-        }
+        return (bool) (new User())->find(['name' => $param]);
     }
 
 }

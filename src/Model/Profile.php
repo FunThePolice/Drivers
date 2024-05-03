@@ -7,9 +7,11 @@ class Profile extends BaseModel
 
     protected static string $table = 'profiles';
 
-    protected array $fillable = ['settings'];
+    protected array $fillable = ['settings' ,'user_id'];
 
-    public int|string $userId;
+    public int $id;
+
+    public int $userId;
 
     public string $settings = 'settings';
 
@@ -31,7 +33,7 @@ class Profile extends BaseModel
         return $this->settings;
     }
 
-    public function setUserId(int|string $userId)
+    public function setUserId(int $userId)
     {
         $this->userId = $userId;
         return $this;
@@ -40,6 +42,17 @@ class Profile extends BaseModel
     public function getUserId(): int
     {
         return $this->userId;
+    }
+
+    public function setId(int $id): Profile
+    {
+        $this->id = $id;
+        return $this;
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
     }
 
 }

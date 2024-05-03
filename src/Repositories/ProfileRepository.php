@@ -3,17 +3,22 @@
 namespace App\Repositories;
 
 use App\Model\Profile;
+use App\Model\User;
 
 class ProfileRepository
 {
 
-    public function create(int $userId): Profile
+    public function create(User $user): Profile
     {
         (new Profile())
-            ->fill(['settings' => 'settings'])
-            ->setUserId($userId)
+            ->fill([
+                'settings' => 'settings',
+                'user_id' => $user->getId()
+            ])
             ->save();
-        return (new Profile());
+        /** @var Profile $profile */
+        $profile = (new Profile())->find(['user_id' => $user->getId()]);
+        return $profile;
     }
 
 }
