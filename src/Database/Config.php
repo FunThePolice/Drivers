@@ -17,15 +17,6 @@ class Config
 
     private static string $charset = 'utf8mb4';
 
-    public function __construct(string $host, int $port, string $database, string $userName, string $password)
-    {
-        $this->setHost($host)
-            ->setPort($port)
-            ->setDatabase($database)
-            ->setUserName($userName)
-            ->setPassword($password);
-    }
-
     public function getHost(): string
     {
         return $this->host;

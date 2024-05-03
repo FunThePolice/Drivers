@@ -7,7 +7,7 @@ return [
     'connections' => [
 
         'mysqli' => [
-            'driver' => \App\Database\Drivers\Mysqli\MySqlDriver::class,
+            'driver' => 'mysqli',
             'host' => 'localhost',
             'port' => 3306,
             'database' => 'users',
@@ -16,12 +16,14 @@ return [
         ],
 
         'PDO' => [
-            'driver' => \App\Database\Drivers\PDO\PdoDriver::class,
+            'driver' => 'PDO',
             'host' => 'localhost',
             'port' => 3306,
             'database' => 'users',
             'username' => 'root',
             'password' => '',
         ]
+
     ]
+
 ];

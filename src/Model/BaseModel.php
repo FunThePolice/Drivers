@@ -3,38 +3,20 @@
 namespace App\Model;
 
 use App\Builder\Builder;
-use App\Database\Config;
-use App\Database\Connection;
-use App\Database\Drivers\DriverWrapper;
+use App\Factories\DriverFactory;
 use App\Helpers\MyConfigHelper;
 
-class BaseModel
+abstract class BaseModel
 {
 
     protected static string $table;
 
     protected array $fillable;
 
-    protected Builder $builder;
-
-    public function __construct()
-    {
-        $this->builder = $this->getBuilder();
-    }
-
     public function getBuilder(): Builder
     {
         $configHelper = MyConfigHelper::getConfig();
-
-        $config = new Config(
-            $configHelper['host'],
-            $configHelper['port'],
-            $configHelper['database'],
-            $configHelper['username'],
-            $configHelper['password']
-        );
-
-        $connection = (new Connection($config, new DriverWrapper()))->connect($configHelper['driver']);
+        $connection = DriverFactory::create($configHelper['driver']);
         return new Builder($connection);
     }
 
@@ -55,6 +37,7 @@ class BaseModel
                 $this->{$key} = $value;
             } else {
                 if (in_array($key, $this->fillable)) {
+                    $key = \lcfirst(\str_replace('_', '', \ucwords($key, '_')));
                     $mutator = sprintf('set%s', ucfirst($key));
                     if (is_callable(BaseModel::class, $mutator)) {
                         $this->{$mutator}($value);
@@ -67,27 +50,33 @@ class BaseModel
 
     public function save(): void
     {
-        $this->builder->create($this::getTable(), $this->toArray());
+        $this->getBuilder()->create(static::getTable(), $this->toArray());
     }
 
     public function all(): array
     {
-        return $this->builder->read($this::getTable());
+        return $this->getBuilder()->read(static::getTable());
     }
 
-    public function find(array $condition): bool|array|null
+    public function find(array $condition): BaseModel|bool
     {
-        return $this->builder->readWhere($this::getTable(), $condition);
+       $dbData = $this->getBuilder()->readWhere(static::getTable(), $condition);
+
+       if ($dbData === null) {
+           return false;
+       }
+
+       return (new static())->fill($dbData)->setId($dbData['id']);
     }
 
     public function update(array $condition): void
     {
-        $this->builder->update($this::getTable(), $this->toArray(), $condition);
+        $this->getBuilder()->update(static::getTable(), $this->toArray(), $condition);
     }
 
     public function delete(array $condition): void
     {
-        $this->builder->delete($this::getTable(), $condition);
+        $this->getBuilder()->delete(static::getTable(), $condition);
     }
 
 }

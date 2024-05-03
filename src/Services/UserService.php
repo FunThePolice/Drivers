@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Model\User;
 use App\Repositories\ProfileRepository;
 use App\Repositories\UserRepository;
 
@@ -21,28 +22,21 @@ class UserService
     public function createUser(array $data): array
     {
         $user = $this->userRepository->create($data);
-        $profile = $this->profileRepository->create($user->getId());
-        $viewUserId = $this->userRepository->uuidGen();
-        $user->setId($viewUserId);
-        $profile->setUser_id($viewUserId);
+        $profile = $this->profileRepository->create($user);
         return compact('user','profile');
     }
 
     public function verifyUser(array $data): bool
     {
-        if ($this->checkIfUserExist($data)) {
-            $user = $this->userRepository->getByName($data['name']);
+        if ($this->isUserNameExist($data)) {
+            $user = $this->userRepository->getByKey('name', $data['name']);
         }
 
-        if (password_verify($data['password'], $user->getPassword())) {
-            return true;
-        } else {
-            return false;
-        }
-
+        /** @var User $user */
+        return PasswordService::verifyPassword($data['password'], $user->getPassword());
     }
 
-    public function checkIfUserExist(array $data): bool
+    public function isUserNameExist(array $data): bool
     {
        return $this->userRepository->existsByName($data['name']);
     }
