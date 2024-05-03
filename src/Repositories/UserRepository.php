@@ -2,15 +2,15 @@
 
 namespace App\Repositories;
 
-use App\Helpers\MyPasswordHelper;
 use App\Model\User;
+use App\Services\PasswordService;
 
 class UserRepository
 {
 
     public function create(array $data): User
     {
-        $data['password'] = MyPasswordHelper::hashPassword($data['password']);
+        $data['password'] = PasswordService::hashPassword($data['password']);
         (new User())->fill($data)->save();
         return $this->getByName($data['name']);
     }

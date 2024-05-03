@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Helpers\MyPasswordHelper;
 use App\Helpers\MyUuidHelper;
 use App\Repositories\ProfileRepository;
 use App\Repositories\UserRepository;
@@ -36,7 +35,7 @@ class UserService
             $user = $this->userRepository->getByName($data['name']);
         }
 
-        if (MyPasswordHelper::verifyPassword($data['password'], $user->getPassword())) {
+        if (PasswordService::verifyPassword($data['password'], $user->getPassword())) {
             return true;
         } else {
             return false;

@@ -17,10 +17,10 @@ class MySessionHelper
         return $this->setSessionKey($session, static::USER_STATE_KEY, $state);
     }
 
-    public function setSessionKey($session, $key, $value): array
+    public function setSessionKey(array $session, string $key, $value): array
     {
         $session[$key] = $value;
-        return $session ?? [];
+        return $session;
     }
 
 }

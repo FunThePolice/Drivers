@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Services;
 
-class MyPasswordHelper
+class PasswordService
 {
 
     public static function hashPassword(string $password): string
