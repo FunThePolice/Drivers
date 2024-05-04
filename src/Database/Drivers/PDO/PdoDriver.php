@@ -64,6 +64,7 @@ class PdoDriver implements IDriver
             $this->wrapper->getColumn()
         ));
         $stmt->execute($this->wrapper->getParams());
+
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -99,6 +100,7 @@ class PdoDriver implements IDriver
             $table
         ));
         $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

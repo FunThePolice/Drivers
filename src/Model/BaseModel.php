@@ -15,8 +15,9 @@ abstract class BaseModel
 
     public function getBuilder(): Builder
     {
-        $configHelper = MyConfigHelper::getConfig();
-        $connection = DriverFactory::create($configHelper['driver']);
+        $configHelper = MyConfigHelper::getDbConfig();
+        $connection = DriverFactory::create($configHelper->getDriver());
+
         return new Builder($connection);
     }
 
@@ -45,6 +46,7 @@ abstract class BaseModel
                 }
             }
         }
+
         return $this;
     }
 
@@ -58,7 +60,7 @@ abstract class BaseModel
         return $this->getBuilder()->read(static::getTable());
     }
 
-    public function find(array $condition): BaseModel|bool
+    public function find(array $condition): static|bool
     {
        $dbData = $this->getBuilder()->readWhere(static::getTable(), $condition);
 

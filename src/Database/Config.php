@@ -15,6 +15,8 @@ class Config
 
     private string $password;
 
+    private string $driver;
+
     private static string $charset = 'utf8mb4';
 
     public function getHost(): string
@@ -69,6 +71,17 @@ class Config
     public function setPassword(string $password): Config
     {
         $this->password = $password;
+        return $this;
+    }
+
+    public function getDriver(): string
+    {
+        return $this->driver;
+    }
+
+    public function setDriver(string $driver): Config
+    {
+        $this->driver = $driver;
         return $this;
     }
 

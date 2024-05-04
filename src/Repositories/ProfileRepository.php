@@ -16,9 +16,8 @@ class ProfileRepository
                 'user_id' => $user->getId()
             ])
             ->save();
-        /** @var Profile $profile */
-        $profile = (new Profile())->find(['user_id' => $user->getId()]);
-        return $profile;
+
+        return (new Profile())->find(['user_id' => $user->getId()]);
     }
 
 }

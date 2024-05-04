@@ -13,12 +13,11 @@ class UserRepository
     {
         $data['password'] = PasswordService::hashPassword($data['password']);
         (new User())->fill($data)->save();
-        /** @var User $user */
-        $user = $this->getByKey('name', $data['name']);
-        return $user;
+
+        return $this->getByKey('name', $data['name']);
     }
 
-    public function getByKey(string $key , string $value): BaseModel
+    public function getByKey(string $key , string $value): User|bool
     {
         return (new User())->find([$key => $value]);
     }

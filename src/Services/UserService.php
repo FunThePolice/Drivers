@@ -23,6 +23,7 @@ class UserService
     {
         $user = $this->userRepository->create($data);
         $profile = $this->profileRepository->create($user);
+
         return compact('user','profile');
     }
 
