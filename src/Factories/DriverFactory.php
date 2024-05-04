@@ -14,18 +14,9 @@ class DriverFactory
 
     public static function create(string $driver): IDriver
     {
-        $configHelper = MyConfigHelper::getConfig();
-
-        $config = (new Config())
-            ->setHost($configHelper['host'])
-            ->setPort($configHelper['port'])
-            ->setDatabase($configHelper['database'])
-            ->setUserName($configHelper['username'])
-            ->setPassword($configHelper['password']);
-
         return match ($driver) {
-            'mysqli' => new MySqlDriver($config, new DriverWrapper()),
-            'PDO' => new PdoDriver($config, new DriverWrapper())
+            'mysqli' => new MySqlDriver(MyConfigHelper::getDbConfig(), new DriverWrapper()),
+            'PDO' => new PdoDriver(MyConfigHelper::getDbConfig(), new DriverWrapper())
         };
     }
 

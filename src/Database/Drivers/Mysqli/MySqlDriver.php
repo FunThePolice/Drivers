@@ -65,6 +65,7 @@ class MySqlDriver implements IDriver
         ));
         $stmt->execute($this->wrapper->getParams());
         $result = $stmt->get_result();
+
         return $result->fetch_assoc();
     }
 
@@ -76,6 +77,7 @@ class MySqlDriver implements IDriver
         ));
         $stmt->execute();
         $result = $stmt->get_result();
+
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
