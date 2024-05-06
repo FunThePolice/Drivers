@@ -10,12 +10,7 @@ class ProfileRepository
 
     public function create(User $user): Profile
     {
-        (new Profile())
-            ->fill([
-                'settings' => 'settings',
-                'user_id' => $user->getId()
-            ])
-            ->save();
+        (new Profile())->fill(['user_id' => $user->getId()])->save();
 
         return (new Profile())->find(['user_id' => $user->getId()]);
     }

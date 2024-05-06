@@ -51,7 +51,8 @@ class MySqlDriver implements IDriver
             $this->wrapper->getFields(),
             $this->wrapper->getPlaceholders()
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bind_param($this->wrapper->getTypes(),...$this->wrapper->getParams());
+        $stmt->execute();
     }
 
     public function readWhere(string $table, array $condition): array|bool|null
@@ -63,7 +64,8 @@ class MySqlDriver implements IDriver
             $table,
             $this->wrapper->getColumn()
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bind_param($this->wrapper->getTypes(),...$this->wrapper->getParams());
+        $stmt->execute();
         $result = $stmt->get_result();
 
         return $result->fetch_assoc();
@@ -91,7 +93,8 @@ class MySqlDriver implements IDriver
             $this->wrapper->getFields(),
             $this->wrapper->getColumn()
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bind_param($this->wrapper->getTypes(),...$this->wrapper->getParams());
+        $stmt->execute();
     }
 
     public function delete(string $table, array $condition): void
@@ -103,7 +106,8 @@ class MySqlDriver implements IDriver
             $table,
             $this->wrapper->getColumn()
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bind_param($this->wrapper->getTypes(),...$this->wrapper->getParams());
+        $stmt->execute();
     }
 
 }

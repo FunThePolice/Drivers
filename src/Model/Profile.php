@@ -7,30 +7,56 @@ class Profile extends BaseModel
 
     protected static string $table = 'profiles';
 
-    protected array $fillable = ['settings' ,'user_id'];
+    protected array $fillable = ['first_name', 'last_name', 'middle_name', 'user_id'];
 
     public int $id;
 
     public int $userId;
 
-    public string $settings = 'settings';
+    public string $firstName;
+
+    public string $lastName;
+
+    public string $middleName;
 
     public function toArray(): array
     {
         return [
-            'settings' => $this->settings,
-            'user_id' => $this->userId,
+            'first_name' => $this->firstName,
+            'last_name' => $this->lastName,
+            'middle_name' => $this->middleName,
+            'user_id' => $this->userId
         ];
     }
 
-    public function setSettings(string $settings = 'settings'): void
+    public function setFirstName(string $firstName): void
     {
-        $this->settings = $settings;
+        $this->firstName = $firstName;
     }
 
-    public function getSettings(): string
+    public function getFirstName(): string
     {
-        return $this->settings;
+        return $this->firstName;
+    }
+
+    public function setLastName(string $lastName): void
+    {
+        $this->lastName = $lastName;
+    }
+
+    public function getLastName(): string
+    {
+        return $this->lastName;
+    }
+
+    public function setMiddleName(string $middleName): void
+    {
+        $this->middleName = $middleName;
+    }
+
+    public function getMiddleName(): string
+    {
+        return $this->middleName;
     }
 
     public function setUserId(int $userId)
