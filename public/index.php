@@ -3,15 +3,20 @@
 use App\Helpers\MySessionHelper;
 use App\Repositories\ProfileRepository;
 use App\Repositories\UserRepository;
+use App\Services\ProfileService;
 use App\Services\UserService;
 
 require __DIR__.'/../vendor/autoload.php';
 
 session_start();
 
-$serv = new UserService(
+$userService = new UserService(
     new UserRepository(),
     new ProfileRepository()
+);
+
+$profileService = new ProfileService(
+    new ProfileRepository(),
 );
 
 $mySession = new MySessionHelper();
@@ -46,12 +51,15 @@ switch ($request) {
     case '/logout' :
         require __DIR__.'/../src/Actions/logout.php';
         break;
+    case '/update' :
+        require __DIR__.'/../src/Actions/update.php';
+        break;
+    case '/info' :
+        require __DIR__.'/../src/Views/info.php';
+        break;
     default:
         http_response_code(404);
         require __DIR__ . '/views/404.php';
         break;
 
 }
-
-
-

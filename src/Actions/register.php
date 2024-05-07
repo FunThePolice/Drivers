@@ -1,9 +1,10 @@
 <?php
 
-if (!$serv->isUserNameExist($_POST)) {
-    $serv->createUser($_POST);
-    header('location: /profile');
+if (!$userService->isUserNameExist($_POST)) {
+    $data = $userService->createUser($_POST);
     $_SESSION = $mySession->setUserState($_SESSION ?? [],true);
+    $_SESSION = $mySession->setSessionKey($_SESSION,'id',$data['user']->getId());
+    header('Location: /profile');
 } else {
-    header('location: /registration');
+    header('Location: /registration');
 }

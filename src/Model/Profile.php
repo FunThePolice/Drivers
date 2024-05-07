@@ -21,17 +21,18 @@ class Profile extends BaseModel
 
     public function toArray(): array
     {
-        return [
-            'first_name' => $this->firstName,
-            'last_name' => $this->lastName,
-            'middle_name' => $this->middleName,
-            'user_id' => $this->userId
-        ];
+        foreach ($this->fillable as $value) {
+            $value =\lcfirst(\str_replace('_', '', \ucwords($value, '_')));
+            if (isset($this->{$value})) {
+                $result[$value] = $this->{$value};
+            }
+        }
+        return $result;
     }
 
     public function setFirstName(string $firstName): void
     {
-        $this->firstName = $firstName;
+        $this->firstName = ucfirst($firstName);
     }
 
     public function getFirstName(): string
@@ -41,7 +42,7 @@ class Profile extends BaseModel
 
     public function setLastName(string $lastName): void
     {
-        $this->lastName = $lastName;
+        $this->lastName = ucfirst($lastName);
     }
 
     public function getLastName(): string
@@ -51,7 +52,7 @@ class Profile extends BaseModel
 
     public function setMiddleName(string $middleName): void
     {
-        $this->middleName = $middleName;
+        $this->middleName = ucfirst($middleName);
     }
 
     public function getMiddleName(): string

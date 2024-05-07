@@ -93,6 +93,7 @@ class MySqlDriver implements IDriver
             $this->wrapper->getFields(),
             $this->wrapper->getColumn()
         ));
+
         $stmt->bind_param($this->wrapper->getTypes(),...$this->wrapper->getParams());
         $stmt->execute();
     }
