@@ -27,6 +27,11 @@ class UserService
         return compact('user','profile');
     }
 
+    public function getUserByKey(string $key, $value): User
+    {
+        return $this->userRepository->getByKey($key, $value);
+    }
+
     public function verifyUser(array $data): bool
     {
         if ($this->isUserNameExist($data)) {

@@ -17,7 +17,7 @@ class UserRepository
         return $this->getByKey('name', $data['name']);
     }
 
-    public function getByKey(string $key , string $value): User|bool
+    public function getByKey(string $key , $value): User|bool
     {
         return (new User())->find([$key => $value]);
     }
