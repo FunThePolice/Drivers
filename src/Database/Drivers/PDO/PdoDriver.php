@@ -51,7 +51,8 @@ class PdoDriver implements IDriver
             $this->wrapper->getFields(),
             $this->wrapper->getPlaceholders()
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bindParam($this->wrapper->getTypes(),...$this->wrapper->getParams());
+        $stmt->execute();
     }
 
     public function readWhere(string $table, array $condition): array|bool
@@ -63,7 +64,8 @@ class PdoDriver implements IDriver
             $table,
             $this->wrapper->getColumn()
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bindParam($this->wrapper->getTypes(),...$this->wrapper->getParams());
+        $stmt->execute();
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -78,7 +80,8 @@ class PdoDriver implements IDriver
             $this->wrapper->getFields(),
             $this->wrapper->getColumn()
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bindParam($this->wrapper->getTypes(),...$this->wrapper->getParams());
+        $stmt->execute();
     }
 
     public function delete(string $table, array $condition): void
@@ -90,7 +93,8 @@ class PdoDriver implements IDriver
             $table,
             $this->wrapper->getColumn()
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bindParam($this->wrapper->getTypes(),...$this->wrapper->getParams());
+        $stmt->execute();
     }
 
     public function read(string $table): array

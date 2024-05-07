@@ -34,14 +34,17 @@ abstract class BaseModel
     public function fill(array $data)
     {
         foreach ($data as $key => $value) {
-            if (empty($this->fillable)) {
-                $this->{$key} = $value;
-            } else {
-                if (in_array($key, $this->fillable)) {
-                    $key = \lcfirst(\str_replace('_', '', \ucwords($key, '_')));
-                    $mutator = sprintf('set%s', ucfirst($key));
-                    if (is_callable(BaseModel::class, $mutator)) {
-                        $this->{$mutator}($value);
+            if (isset($value)) {
+                if (empty($this->fillable)) {
+                    $this->{$key} = $value;
+                } else {
+                    $key = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $key));
+                    if (in_array($key, $this->fillable)) {
+                        $key = \lcfirst(\str_replace('_', '', \ucwords($key, '_')));
+                        $mutator = sprintf('set%s', ucfirst($key));
+                        if (is_callable(BaseModel::class, $mutator)) {
+                            $this->{$mutator}($value);
+                        }
                     }
                 }
             }

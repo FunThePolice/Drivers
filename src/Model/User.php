@@ -17,12 +17,15 @@ class User extends BaseModel
 
     public string $password;
 
+    public bool $permissionLevel = false;
+
     public function toArray(): array
     {
         return [
             'name' => $this->name,
             'email' => $this->email,
             'password' => $this->password,
+            'permission_level' => $this->permissionLevel,
         ];
     }
 
@@ -65,6 +68,17 @@ class User extends BaseModel
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function getPermissionLevel(): bool
+    {
+        return $this->permissionLevel;
+    }
+
+    public function setPermissionLevel(bool $permissionLevel)
+    {
+        $this->permissionLevel = $permissionLevel;
+        return $this;
     }
 
 }

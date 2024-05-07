@@ -17,27 +17,58 @@ class DriverWrapper
 
     public function prepareDataForInsert(array $data): void
     {
-        $keys = array_keys($data);
+        $keys = $this->prepareKeys(array_keys($data));
         $this->fields = implode(', ', $keys);
         $this->placeholders = str_repeat('?,', count($keys) - 1).'?';
-        $this->types = str_repeat('s', count($data));
+        $this->types = $this->defineDataTypes($data);
         $this->params = array_values($data);
     }
 
     public function prepareDataForSelect(array $condition): void
     {
-        $this->column = implode('=? AND ', array_keys($condition)) . '=?';
+        $keys = $this->prepareKeys(array_keys($condition));
+        $this->column = implode('=? AND ', $keys) . '=?';
+        $this->types = $this->defineDataTypes($condition);
         $this->params = array_values($condition);
     }
 
     public function prepareDataForUpdate(array $data, array $condition): void
     {
-        $keys = array_keys($data);
+        $keys = $this->prepareKeys(array_keys($data));
         $this->fields = implode('= ?, ', $keys) . '= ?';
-        $this->types = str_repeat('s', count($data));
+        $this->types = $this->defineDataTypes($data) . $this->defineDataTypes($condition);
         $values = array_values($data);
-        $this->column = implode('= ? AND ', array_keys($condition)) . '= ?';
+        $this->column = implode('= ? AND ', $this->prepareKeys(array_keys($condition))) . '= ?';
         $this->params = array_merge($values, array_values($condition));
+    }
+
+    public function defineDataTypes(array $data): string
+    {
+        $result = '';
+        foreach ($data as $value) {
+            switch (gettype($value)) {
+                case 'string':
+                    $type = 's';
+                    break;
+                case 'integer':
+                    $type = 'i';
+                    break;
+                case 'boolean':
+                    $type = 'i';
+            }
+            $result .= $type;
+        }
+
+        return $result;
+    }
+
+    private function prepareKeys(array $keys): array
+    {
+        foreach ($keys as $key) {
+            $result = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $key));
+            $finalKeys[] = $result;
+        }
+        return $finalKeys;
     }
 
     public function getColumn(): string
