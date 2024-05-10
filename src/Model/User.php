@@ -17,12 +17,15 @@ class User extends BaseModel
 
     public string $password;
 
+    public bool $permissionLevel = false;
+
     public function toArray(): array
     {
         return [
             'name' => $this->name,
             'email' => $this->email,
             'password' => $this->password,
+            'permission_level' => $this->permissionLevel,
         ];
     }
 
@@ -39,12 +42,12 @@ class User extends BaseModel
 
     public function setName(string $name): void
     {
-        $this->name = ucfirst($name);
+        $this->name = $name;
     }
 
     public function getName(): string
     {
-        return $this->name;
+        return ucfirst($this->name);
     }
 
     public function setEmail(string $email): void
@@ -65,6 +68,17 @@ class User extends BaseModel
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->permissionLevel;
+    }
+
+    public function setPermissionLevel(bool $permissionLevel)
+    {
+        $this->permissionLevel = $permissionLevel;
+        return $this;
     }
 
 }

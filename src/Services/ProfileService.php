@@ -15,9 +15,14 @@ class ProfileService
         $this->profileRepository = $profileRepository;
     }
 
-    public function updateInfo(array $data, $value): Profile
+    public function updateInfo(array $data, int $value): Profile
     {
-        return $this->profileRepository->update($data, $this->profileRepository->getByKey('user_id', $value));
+        return $this->profileRepository->update($data, $this->profileRepository->getByUserId($value));
+    }
+
+    public function getAll(): array
+    {
+        return $this->profileRepository->getAll();
     }
 
 }

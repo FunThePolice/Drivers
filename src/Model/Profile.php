@@ -32,32 +32,32 @@ class Profile extends BaseModel
 
     public function setFirstName(string $firstName): void
     {
-        $this->firstName = ucfirst($firstName);
+        $this->firstName = lcfirst($firstName);
     }
 
     public function getFirstName(): string
     {
-        return $this->firstName;
+        return ucfirst($this->firstName);
     }
 
     public function setLastName(string $lastName): void
     {
-        $this->lastName = ucfirst($lastName);
+        $this->lastName = lcfirst($lastName);
     }
 
     public function getLastName(): string
     {
-        return $this->lastName;
+        return ucfirst($this->lastName);
     }
 
     public function setMiddleName(string $middleName): void
     {
-        $this->middleName = ucfirst($middleName);
+        $this->middleName = lcfirst($middleName);
     }
 
     public function getMiddleName(): string
     {
-        return $this->middleName;
+        return ucfirst($this->middleName);
     }
 
     public function setUserId(int $userId)

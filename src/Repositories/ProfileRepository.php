@@ -22,9 +22,6 @@ class ProfileRepository
 
     public function update(array $data, Profile $profile): Profile
     {
-        var_dump($data);
-        var_dump($profile->toArray());
-        var_dump((new Profile())->fill($data));
         (new Profile())->fill($data)->update($profile->toArray());
 
         return (new Profile())->find($data);
@@ -33,6 +30,16 @@ class ProfileRepository
     public function getByKey(string $key, $value): Profile
     {
         return (new Profile())->find([$key => $value]);
+    }
+
+    public function getByUserId(int $userId): Profile
+    {
+        return (new Profile())->find(['user_id' => $userId]);
+    }
+
+    public function getAll(): array
+    {
+        return (new Profile())->all();
     }
 
 }

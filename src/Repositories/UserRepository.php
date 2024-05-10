@@ -17,14 +17,34 @@ class UserRepository
         return $this->getByKey('name', $data['name']);
     }
 
-    public function getByKey(string $key , $value): User|bool
+    public function getByKey(string $key, string $value): User|bool
     {
         return (new User())->find([$key => $value]);
+    }
+
+    public function getById(int $id): User|bool
+    {
+        return (new User())->find(['id' => $id]);
     }
 
     public function existsByName(string $param): bool
     {
         return (bool) (new User())->find(['name' => $param]);
+    }
+
+    public function getAll(): array
+    {
+        return (new User())->all();
+    }
+
+    public function pair(string $child, array $data): void
+    {
+        (new User())->createPair($child, $data);
+    }
+
+    public function getPair(string $child , array $condition): array|null
+    {
+        return (new User())->getPair($child, $condition);
     }
 
 }
