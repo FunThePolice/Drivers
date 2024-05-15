@@ -1,4 +1,4 @@
-<?php $profile = (new \App\Model\Profile())->find(['userId' => $_GET['user_id']]) ?>
+<?php $profile = (new \App\Model\Profile())->find(['user_id' => $_GET['user_id']]) ?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -11,21 +11,21 @@
 <div class="container text-center">
     <form action="/adminProfileUpdate" method="post">
         <div class="col-sm-3 mt-5 mx-auto">
-            <label class="form-label" for="firstName">First Name:</label>
-            <input class="form-control" name="firstName" id="firstName" type="text" value="<?= $profile->getFirstName() ?>"/><br/>
+            <label class="form-label" for="first_name">First Name:</label>
+            <input class="form-control" name="first_name" id="first_name" type="text" value="<?= $profile->getFirstName() ?>"/><br/>
         </div>
 
         <div class="col-sm-3 mx-auto">
-            <label class="form-label" for="lastName">Second Name:</label>
-            <input class="form-control" name="lastName" id="lastName" type="text" value="<?= $profile->getLastName() ?>"/><br/>
+            <label class="form-label" for="last_name">Second Name:</label>
+            <input class="form-control" name="last_name" id="last_name" type="text" value="<?= $profile->getLastName() ?>"/><br/>
         </div>
 
         <div class="col-sm-3 mx-auto">
-            <label class="form-label" for="middleName">Middle Name:</label>
-            <input class="form-control" name="middleName" id="middleName" type="text" value="<?= $profile->getMiddleName() ?>"/><br/>
+            <label class="form-label" for="middle_name">Middle Name:</label>
+            <input class="form-control" name="middle_name" id="middle_name" type="text" value="<?= $profile->getMiddleName() ?>"/><br/>
         </div>
 
-        <input type="hidden" name="user_id" value="<?= $profile->getUserId() ?>"/>
+        <input type="hidden" name="id" value="<?= $profile->getId() ?>"/>
         <div class="mb-3">
             <button class="btn btn-primary" type="submit">Submit</button>
         </div>

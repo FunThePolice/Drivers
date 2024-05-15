@@ -2,6 +2,8 @@
 
 namespace App\Model;
 
+use App\Helpers\Dumper;
+
 class Profile extends BaseModel
 {
 
@@ -22,9 +24,9 @@ class Profile extends BaseModel
     public function toArray(): array
     {
         foreach ($this->fillable as $value) {
-            $value =\lcfirst(\str_replace('_', '', \ucwords($value, '_')));
-            if (isset($this->{$value})) {
-                $result[$value] = $this->{$value};
+            $key =\lcfirst(\str_replace('_', '', \ucwords($value, '_')));
+            if (isset($this->{$key})) {
+                $result[$value] = $this->{$key};
             }
         }
         return $result;

@@ -4,6 +4,7 @@ namespace App\Model;
 
 use App\Builder\Builder;
 use App\Factories\DriverFactory;
+use App\Helpers\Dumper;
 use App\Helpers\MyConfigHelper;
 
 abstract class BaseModel
@@ -38,7 +39,6 @@ abstract class BaseModel
                 if (empty($this->fillable)) {
                     $this->{$key} = $value;
                 } else {
-                    $key = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $key));
                     if (in_array($key, $this->fillable)) {
                         $key = \lcfirst(\str_replace('_', '', \ucwords($key, '_')));
                         $mutator = sprintf('set%s', ucfirst($key));
@@ -59,10 +59,10 @@ abstract class BaseModel
             if (isset($value)) {
                 $key = \lcfirst(\str_replace('_', '', \ucwords($key, '_')));
                 $mutator = sprintf('set%s', ucfirst($key));
-                    if (is_callable(BaseModel::class, $mutator)) {
-                        $this->{$mutator}($value);
-                    }
-            }
+                if (is_callable(BaseModel::class, $mutator)) {
+                    $this->{$mutator}($value);
+                }
+        }
         }
 
         return $this;
@@ -89,10 +89,12 @@ abstract class BaseModel
     public function all(): array
     {
         $dbData = $this->getBuilder()->read(static::getTable());
+
         foreach ($dbData as $value) {
             $item = (new static())->fillFromDb($value);
             $result[] = $item;
         }
+
         return $result;
     }
 
@@ -104,7 +106,7 @@ abstract class BaseModel
             return false;
         }
 
-        return (new static())->fillFromDb($dbData);
+        return (new static())->fillFromDb($dbData[0]);
     }
 
     public function update(array $condition): void

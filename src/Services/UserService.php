@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\Dumper;
 use App\Model\Role;
 use App\Model\User;
 use App\Repositories\ProfileRepository;
@@ -36,7 +37,7 @@ class UserService
         return compact('user','profile');
     }
 
-    public function getUserByKey(string $key, $value): User
+    public function getUserByKey(string $key, string $value): User
     {
         return $this->userRepository->getByKey($key, $value);
     }
@@ -50,6 +51,7 @@ class UserService
     {
         if ($this->isUserNameExist($data)) {
             $user = $this->userRepository->getByKey('name', $data['name']);
+            Dumper::dd($user);
         }
 
         /** @var User $user */
@@ -66,22 +68,20 @@ class UserService
         return $this->userRepository->getAll();
     }
 
-    public function giveRole(User $user, Role $role): void
+    public function setRole(Role $role): void
     {
-        $data = [
-            'user_id' => $user->getId(),
-            'role_id' => $role->getId()
-        ];
-        $this->userRepository->pair(Role::getTable(), $data);
+        $this->userRepository->pair($role);
     }
 
-    public function getUserRole(int $userId): Role
+    public function getUserRole(int $userId): array|null
     {
-        $pair = $this->userRepository->getPair(Role::getTable(), ['user_id' => $userId]);
+        $pair = $this->userRepository->getById($userId)->roles();
+
         if (is_null($pair)) {
-            return (new Role())->fill(['name' => 'role']);
+            return null;
         }
-        return (new Role())->find(['id' => $pair['role_id']]);
+
+        return $pair;
     }
 
 }

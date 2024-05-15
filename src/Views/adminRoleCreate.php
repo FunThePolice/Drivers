@@ -15,6 +15,7 @@
             <input class="form-control" name="name" id="name" type="text"/><br/>
             <button type="submit" class="btn btn-primary">create</button>
         </div>
+    </form>
 
         <form action="/adminUsers" method="post">
             <button type="submit" class="btn btn-secondary">Back</button>

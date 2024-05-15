@@ -42,7 +42,7 @@ switch ($request) {
         break;
     case '/profile' :
 
-        if ($mySession->getUserStatus($_SESSION)) {
+        if ($mySession->isUserAuth($_SESSION)) {
             require __DIR__ . '/../src/Views/profile.php';
         } else {
             require __DIR__ . '/../src/Views/signIn.php';
@@ -65,7 +65,7 @@ switch ($request) {
         require __DIR__.'/../src/Views/info.php';
         break;
     case '/admin' :
-        if ($mySession->getAdminState($_SESSION)) {
+        if ($mySession->isAdmin($_SESSION)) {
             require __DIR__.'/../src/Views/admin.php';
         } else {
             require __DIR__ . '/../src/Views/signIn.php';

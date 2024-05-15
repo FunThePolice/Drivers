@@ -17,16 +17,23 @@ class User extends BaseModel
 
     public string $password;
 
-    public bool $permissionLevel = false;
-
     public function toArray(): array
     {
         return [
             'name' => $this->name,
             'email' => $this->email,
             'password' => $this->password,
-            'permission_level' => $this->permissionLevel,
         ];
+    }
+
+    public function roles(): ?array
+    {
+        return $this->getBuilder()->getMany($this, Role::class, 'role_user', 'role_id', 'user_id');
+    }
+
+    public function setRole(Role $role): void
+    {
+        $this->getBuilder()->setRelated($this, $role->getId(), 'role_user', 'role_id', 'user_id');
     }
 
     public function setId(int $id): User
@@ -68,17 +75,6 @@ class User extends BaseModel
     public function getPassword(): string
     {
         return $this->password;
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->permissionLevel;
-    }
-
-    public function setPermissionLevel(bool $permissionLevel)
-    {
-        $this->permissionLevel = $permissionLevel;
-        return $this;
     }
 
 }

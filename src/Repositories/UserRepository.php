@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Model\BaseModel;
+use App\Model\Role;
 use App\Model\User;
 use App\Services\PasswordService;
 
@@ -37,14 +38,14 @@ class UserRepository
         return (new User())->all();
     }
 
-    public function pair(string $child, array $data): void
+    public function pair(Role $role): void
     {
-        (new User())->createPair($child, $data);
+        (new User())->setRole($role);
     }
 
-    public function getPair(string $child , array $condition): array|null
+    public function getPair(): array|null
     {
-        return (new User())->getPair($child, $condition);
+        return (new User())->roles();
     }
 
 }

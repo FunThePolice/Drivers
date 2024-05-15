@@ -22,7 +22,7 @@ class ProfileRepository
 
     public function update(array $data, Profile $profile): Profile
     {
-        (new Profile())->fill($data)->update($profile->toArray());
+        (new Profile())->fill($data)->update(['id' => $profile->getId()]);
 
         return (new Profile())->find($data);
     }
@@ -30,6 +30,11 @@ class ProfileRepository
     public function getByKey(string $key, $value): Profile
     {
         return (new Profile())->find([$key => $value]);
+    }
+
+    public function getById(int $id): Profile
+    {
+        return (new Profile())->find(['id' => $id]);
     }
 
     public function getByUserId(int $userId): Profile

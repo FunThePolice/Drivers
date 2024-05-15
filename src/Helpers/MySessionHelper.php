@@ -6,9 +6,10 @@ class MySessionHelper
 {
 
     const USER_STATE_KEY = 'is_authorized';
-    const ADMIN_STATE_KEY = 'is_admin';
 
-    public function getUserStatus(array $session): bool
+    const ADMIN_ROLE = 'admin';
+
+    public function isUserAuth(array $session): bool
     {
         return isset($session[static::USER_STATE_KEY]) && $session[static::USER_STATE_KEY] === true;
     }
@@ -18,19 +19,22 @@ class MySessionHelper
         $this->setSessionKey($session, static::USER_STATE_KEY, $state);
     }
 
-    public function setAdminState(array &$session, bool $state): void
-    {
-        $this->setSessionKey($session, static::ADMIN_STATE_KEY, $state);
-    }
-
-    public function getAdminState(array $session): bool
-    {
-        return isset($session[static::ADMIN_STATE_KEY]) && $session[static::ADMIN_STATE_KEY] === true;
-    }
-
     public function setSessionKey(array &$session, string $key, $value): void
     {
         $session[$key] = $value;
+    }
+
+    public function isAdmin(array $session): bool
+    {
+        if (isset($session['user']['roles'])) {
+            foreach ($session['user']['roles'] as $role) {
+                $result = in_array(static::ADMIN_ROLE, $role);
+            }
+        } else {
+            return false;
+        }
+
+        return $result;
     }
 
 }

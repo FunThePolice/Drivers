@@ -2,7 +2,7 @@
 
 return [
 
-    'selected_driver' => 'mysqli',
+    'selected_driver' => 'PDO',
 
     'connections' => [
 
