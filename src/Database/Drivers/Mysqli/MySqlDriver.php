@@ -3,23 +3,20 @@
 namespace App\Database\Drivers\Mysqli;
 
 use App\Database\Config;
+use App\Database\Drivers\BaseDriver;
 use App\Database\Drivers\Contracts\IDriver;
-use App\Database\Drivers\DriverWrapper;
 use mysqli;
 
-class MySqlDriver implements IDriver
+class MySqlDriver extends BaseDriver implements IDriver
 {
 
     private mysqli $db;
 
-    protected DriverWrapper $wrapper;
-
     private Config $config;
 
-    public function __construct(Config $config, DriverWrapper $wrapper)
+    public function __construct(Config $config)
     {
         $this->config = $config;
-        $this->wrapper = $wrapper;
         $this->db = $this->connect();
     }
 
@@ -43,30 +40,32 @@ class MySqlDriver implements IDriver
 
     public function create(string $table, array $data): void
     {
-        $this->wrapper->prepareDataForInsert($data);
-
         $stmt = $this->db->prepare(sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
             $table,
-            $this->wrapper->getFields(),
-            $this->wrapper->getPlaceholders()
+            $this->parseFieldsForInsert($data),
+            $this->parsePlaceholdersForInsert($data)
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bind_param($this->parseTypes($data),...$this->parseParams($data));
+        $stmt->execute();
     }
 
     public function readWhere(string $table, array $condition): array|bool|null
     {
-        $this->wrapper->prepareDataForSelect($condition);
-
         $stmt = $this->db->prepare(sprintf(
-            'SELECT * FROM %s WHERE %s LIMIT 1',
+            'SELECT * FROM %s WHERE %s',
             $table,
-            $this->wrapper->getColumn()
+            $this->parseColumn($condition)
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bind_param($this->parseTypes($condition),...$this->parseParams($condition));
+        $stmt->execute();
         $result = $stmt->get_result();
 
-        return $result->fetch_assoc();
+        while($row = $result->fetch_assoc()) {
+            $output[] = $row;
+        }
+
+        return $output;
     }
 
     public function read(string $table): array
@@ -83,27 +82,28 @@ class MySqlDriver implements IDriver
 
     public function update(string $table, array $data, array $condition): void
     {
-        $this->wrapper->prepareDataForUpdate($data, $condition);
-
         $stmt = $this->db->prepare(sprintf(
             'UPDATE %s SET %s WHERE %s LIMIT 1',
             $table,
-            $this->wrapper->getFields(),
-            $this->wrapper->getColumn()
+            $this->parseFieldsForUpdate($data),
+            $this->parseColumn($condition)
         ));
-        $stmt->execute($this->wrapper->getParams());
+
+        $stmt->bind_param(
+            $this->parseTypes($data) . $this->parseTypes($condition),
+            ...$this->parseParamsForUpdate($data,$condition));
+        $stmt->execute();
     }
 
     public function delete(string $table, array $condition): void
     {
-        $this->wrapper->prepareDataForSelect($condition);
-
         $stmt = $this->db->prepare(sprintf(
             'DELETE FROM %s WHERE %s LIMIT 1',
             $table,
-            $this->wrapper->getColumn()
+            $this->parseColumn($condition)
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->bind_param($this->parseTypes($condition),...$this->parseParams($condition));
+        $stmt->execute();
     }
 
 }

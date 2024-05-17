@@ -2,22 +2,29 @@
 
 namespace App\Factories;
 
-use App\Database\Config;
 use App\Database\Drivers\Contracts\IDriver;
-use App\Database\Drivers\DriverWrapper;
-use App\Database\Drivers\Mysqli\MySqlDriver;
-use App\Database\Drivers\PDO\PdoDriver;
 use App\Helpers\MyConfigHelper;
+use ReflectionClass;
+use ReflectionException;
+use App\Database\Drivers\PDO\PdoDriver;
 
 class DriverFactory
 {
 
-    public static function create(string $driver): IDriver
+    /**
+     * @throws ReflectionException
+     */
+    public static function create(): IDriver
     {
-        return match ($driver) {
-            'mysqli' => new MySqlDriver(MyConfigHelper::getDbConfig(), new DriverWrapper()),
-            'PDO' => new PdoDriver(MyConfigHelper::getDbConfig(), new DriverWrapper())
-        };
+        $config = MyConfigHelper::getDbConfig();
+        $driverClassName = $config->getDriver() ?? false;
+        $reflectionClass = new ReflectionClass($driverClassName);
+
+        if (!$reflectionClass->isInstantiable()) {
+            throw new CouldNotInstantiateDriverClassException();
+        }
+
+        return new $driverClassName();
     }
 
 }

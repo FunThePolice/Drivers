@@ -3,23 +3,22 @@
 namespace App\Database\Drivers\PDO;
 
 use App\Database\Config;
+use App\Database\Drivers\BaseDriver;
 use App\Database\Drivers\Contracts\IDriver;
-use App\Database\Drivers\DriverWrapper;
+use App\Helpers\Dumper;
+use App\Helpers\MyConfigHelper;
 use PDO;
 
-class PdoDriver implements IDriver
+class PdoDriver extends BaseDriver implements IDriver
 {
 
     private PDO $db;
 
-    private DriverWrapper $wrapper;
-
     private Config $config;
 
-    public function __construct(Config $config, DriverWrapper $wrapper)
+    public function __construct()
     {
-        $this->config = $config;
-        $this->wrapper = $wrapper;
+        $this->config = MyConfigHelper::getDbConfig();
         $this->db = $this->connect();
     }
 
@@ -43,54 +42,48 @@ class PdoDriver implements IDriver
 
     public function create(string $table, array $data): void
     {
-        $this->wrapper->prepareDataForInsert($data);
-
         $stmt = $this->db->prepare(sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
             $table,
-            $this->wrapper->getFields(),
-            $this->wrapper->getPlaceholders()
+            $this->parseFieldsForInsert($data),
+            $this->parsePlaceholdersForInsert($data)
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->execute($this->parseParams($data));
     }
 
-    public function readWhere(string $table, array $condition): array|bool
+    public function readWhere(string $table, array $condition): array|bool|null
     {
-        $this->wrapper->prepareDataForSelect($condition);
-
         $stmt = $this->db->prepare(sprintf(
-            'SELECT * FROM %s WHERE %s LIMIT 1',
+            'SELECT * FROM %s WHERE %s',
             $table,
-            $this->wrapper->getColumn()
+            $this->parseColumn($condition)
         ));
-        $stmt->execute($this->wrapper->getParams());
+        $stmt->execute($this->parseParams($condition));
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function update(string $table, array $data, array $condition): void
     {
-        $this->wrapper->prepareDataForUpdate($data, $condition);
-
         $stmt = $this->db->prepare(sprintf(
-            'UPDATE %s SET %s WHERE %s = ? LIMIT 1',
+            'UPDATE %s SET %s WHERE %s LIMIT 1',
             $table,
-            $this->wrapper->getFields(),
-            $this->wrapper->getColumn()
+            $this->parseFieldsForUpdate($data),
+            $this->parseColumn($condition)
         ));
-        $stmt->execute($this->wrapper->getParams());
+
+        $stmt->execute($this->parseParamsForUpdate($data, $condition));
     }
 
     public function delete(string $table, array $condition): void
     {
-        $this->wrapper->prepareDataForSelect($condition);
-
         $stmt = $this->db->prepare(sprintf(
             'DELETE FROM %s WHERE %s LIMIT 1',
             $table,
-            $this->wrapper->getColumn()
+            $this->parseColumn($condition)
         ));
-        $stmt->execute($this->wrapper->getParams());
+
+        $stmt->execute($this->parseParams($condition));
     }
 
     public function read(string $table): array

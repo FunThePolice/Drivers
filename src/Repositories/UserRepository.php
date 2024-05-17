@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Model\BaseModel;
+use App\Model\Role;
 use App\Model\User;
 use App\Services\PasswordService;
 
@@ -17,14 +18,24 @@ class UserRepository
         return $this->getByKey('name', $data['name']);
     }
 
-    public function getByKey(string $key , string $value): User|bool
+    public function getByKey(string $key, string $value): User|bool
     {
         return (new User())->find([$key => $value]);
+    }
+
+    public function getById(int $id): User|bool
+    {
+        return (new User())->find(['id' => $id]);
     }
 
     public function existsByName(string $param): bool
     {
         return (bool) (new User())->find(['name' => $param]);
+    }
+
+    public function getAll(): array
+    {
+        return (new User())->all();
     }
 
 }

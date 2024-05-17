@@ -3,6 +3,8 @@
 namespace App\Builder;
 
 use App\Database\Drivers\Contracts\IDriver;
+use App\Helpers\Dumper;
+use App\Model\BaseModel;
 
 class Builder
 {
@@ -37,6 +39,25 @@ class Builder
     public function delete(string $tableName, array $condition): void
     {
         $this->connection->delete($tableName,$condition);
+    }
+
+    public function getMany(BaseModel $parent, string $related, string $tableName, string $relatedKey, string $parentKey): array|null
+    {
+        $pivotData = $this->connection->read($tableName);
+
+        foreach ($pivotData as $row) {
+            if ($row[$parentKey] === $parent->getId()) {
+                $dbData = $this->connection->readWhere($related::getTable(), ['id' => $row[$relatedKey]]);
+                $result[] = (new $related())->fillFromDb($dbData);
+            }
+        }
+
+        return $result;
+    }
+
+    public function createRelated(BaseModel $parent, int $relatedValue, string $tableName, string $relatedKey, string $parentKey): void
+    {
+        $this->connection->create($tableName, [$parentKey => $parent->getId(), $relatedKey => $relatedValue]);
     }
 
 }
