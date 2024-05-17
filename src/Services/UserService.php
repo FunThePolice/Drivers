@@ -68,20 +68,11 @@ class UserService
         return $this->userRepository->getAll();
     }
 
-    public function setRole(Role $role): void
+    public function createUserRole(User $user, Role $role): void
     {
-        $this->userRepository->pair($role);
+        $user->createUserRole($role);
     }
 
-    public function getUserRole(int $userId): array|null
-    {
-        $pair = $this->userRepository->getById($userId)->roles();
 
-        if (is_null($pair)) {
-            return null;
-        }
-
-        return $pair;
-    }
 
 }

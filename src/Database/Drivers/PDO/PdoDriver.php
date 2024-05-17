@@ -6,6 +6,7 @@ use App\Database\Config;
 use App\Database\Drivers\BaseDriver;
 use App\Database\Drivers\Contracts\IDriver;
 use App\Helpers\Dumper;
+use App\Helpers\MyConfigHelper;
 use PDO;
 
 class PdoDriver extends BaseDriver implements IDriver
@@ -15,9 +16,9 @@ class PdoDriver extends BaseDriver implements IDriver
 
     private Config $config;
 
-    public function __construct(Config $config)
+    public function __construct()
     {
-        $this->config = $config;
+        $this->config = MyConfigHelper::getDbConfig();
         $this->db = $this->connect();
     }
 
@@ -57,14 +58,9 @@ class PdoDriver extends BaseDriver implements IDriver
             $table,
             $this->parseColumn($condition)
         ));
-
         $stmt->execute($this->parseParams($condition));
 
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $output[] = $row;
-        }
-
-        return $output;
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function update(string $table, array $data, array $condition): void

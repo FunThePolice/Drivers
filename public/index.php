@@ -1,12 +1,15 @@
 <?php
 
+use App\Helpers\Dumper;
 use App\Helpers\MySessionHelper;
+use App\Model\User;
 use App\Repositories\ProfileRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
 use App\Services\ProfileService;
 use App\Services\RoleService;
 use App\Services\UserService;
+use App\Database\Drivers\PDO\PdoDriver;
 
 require __DIR__.'/../vendor/autoload.php';
 

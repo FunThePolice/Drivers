@@ -7,7 +7,7 @@ class MySessionHelper
 
     const USER_STATE_KEY = 'is_authorized';
 
-    const ADMIN_ROLE = 'admin';
+    const ADMIN_ROLE = 'Admin';
 
     public function isUserAuth(array $session): bool
     {
@@ -26,15 +26,13 @@ class MySessionHelper
 
     public function isAdmin(array $session): bool
     {
-        if (isset($session['user']['roles'])) {
-            foreach ($session['user']['roles'] as $role) {
-                $result = in_array(static::ADMIN_ROLE, $role);
+        foreach ($session['user']->roles as $role) {
+            if ($role->getName() === static::ADMIN_ROLE) {
+                return true;
             }
-        } else {
-            return false;
         }
-
-        return $result;
+        return false;
     }
+
 
 }

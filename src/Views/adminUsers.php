@@ -34,7 +34,7 @@
                         <div class="input-group">
                             <button class="btn btn-outline-secondary" type="submit">Save</button>
                             <select class="form-select form-select-sm"  aria-label="Role Selection" name="role">
-                                <option selected><?= $item->roles()[0]['name'] ?></option>
+                                <option selected><?= implode('/',$item->getRolesNames($item->roles()->roles))?></option>
                                 <?php foreach ($roleService->getAll() as $role) { ?>
                                     <option value="<?= $role->getName() ?>"><?= $role->getName() ?></option>
                                 <?php } ?>

@@ -38,14 +38,4 @@ class UserRepository
         return (new User())->all();
     }
 
-    public function pair(Role $role): void
-    {
-        (new User())->setRole($role);
-    }
-
-    public function getPair(): array|null
-    {
-        return (new User())->roles();
-    }
-
 }

@@ -1,6 +1,6 @@
 <?php
-\App\Helpers\Dumper::dd($_POST);
-if ($profileService->updateInfo($_POST, $_POST['id'])) {
+
+if ($profileService->updateInfo($profileService->getById($_POST['id'])->fill($_POST))) {
     header('Location: /adminProfiles');
 } else {
     header('Location: /adminProfilesEdit');

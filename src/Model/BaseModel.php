@@ -14,10 +14,12 @@ abstract class BaseModel
 
     protected array $fillable;
 
+    /**
+     * @throws \ReflectionException
+     */
     public function getBuilder(): Builder
     {
-        $configHelper = MyConfigHelper::getDbConfig();
-        $connection = DriverFactory::create($configHelper->getDriver());
+        $connection = DriverFactory::create();
 
         return new Builder($connection);
     }
@@ -62,7 +64,7 @@ abstract class BaseModel
                 if (is_callable(BaseModel::class, $mutator)) {
                     $this->{$mutator}($value);
                 }
-        }
+            }
         }
 
         return $this;
@@ -106,11 +108,12 @@ abstract class BaseModel
             return false;
         }
 
-        return (new static())->fillFromDb($dbData[0]);
+        return (new static())->fillFromDb($dbData);
     }
 
     public function update(array $condition): void
     {
+        Dumper::dd($this->toArray());
         $this->getBuilder()->update(static::getTable(), $this->toArray(), $condition);
     }
 

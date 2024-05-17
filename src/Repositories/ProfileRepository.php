@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Helpers\Dumper;
 use App\Model\Profile;
 use App\Model\User;
 
@@ -20,11 +21,12 @@ class ProfileRepository
         return (new Profile())->find(['user_id' => $user->getId()]);
     }
 
-    public function update(array $data, Profile $profile): Profile
+    public function update(Profile $profile): Profile
     {
-        (new Profile())->fill($data)->update(['id' => $profile->getId()]);
+        Dumper::dd($profile->toArray());
+        $profile->update(['id' => $profile->getId()]);
 
-        return (new Profile())->find($data);
+        return (new Profile())->find(['id' => $profile->getId()]);
     }
 
     public function getByKey(string $key, $value): Profile

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\Dumper;
 use App\Model\Profile;
 use App\Repositories\ProfileRepository;
 
@@ -15,14 +16,24 @@ class ProfileService
         $this->profileRepository = $profileRepository;
     }
 
-    public function updateInfo(array $data, int $value): Profile
+    public function updateInfo(Profile $profile): Profile
     {
-        return $this->profileRepository->update($data, $this->profileRepository->getById($value));
+        return $this->profileRepository->update($profile);
     }
 
     public function getAll(): array
     {
         return $this->profileRepository->getAll();
+    }
+
+    public function getById(int $id): Profile
+    {
+        return $this->profileRepository->getById($id);
+    }
+
+    public function getByUserId(int $userId): Profile
+    {
+        return $this->profileRepository->getByUserId($userId);
     }
 
 }

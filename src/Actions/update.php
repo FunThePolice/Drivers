@@ -1,6 +1,6 @@
 <?php
 
-if ($profileService->updateInfo($_POST,$_POST['id'])) {
+if ($profileService->updateInfo($profileService->getById($_POST['id'])->fill($_POST))) {
     header('Location: /profile');
 } else {
     header('Location: /info');

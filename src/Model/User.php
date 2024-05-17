@@ -2,6 +2,8 @@
 
 namespace App\Model;
 
+use App\Helpers\Dumper;
+
 class User extends BaseModel
 {
 
@@ -26,14 +28,15 @@ class User extends BaseModel
         ];
     }
 
-    public function roles(): ?array
+    public function roles()
     {
-        return $this->getBuilder()->getMany($this, Role::class, 'role_user', 'role_id', 'user_id');
+        $this->{__FUNCTION__} = $this->getBuilder()->getMany($this, Role::class, 'role_user', 'role_id', 'user_id');
+        return $this;
     }
 
-    public function setRole(Role $role): void
+    public function createUserRole(Role $role): void
     {
-        $this->getBuilder()->setRelated($this, $role->getId(), 'role_user', 'role_id', 'user_id');
+        $this->getBuilder()->createRelated($this, $role->getId(), 'role_user', 'role_id', 'user_id');
     }
 
     public function setId(int $id): User
@@ -75,6 +78,15 @@ class User extends BaseModel
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function getRolesNames(array $roles): array
+    {
+        /** @var $role Role $role */
+        foreach ($roles as $role) {
+            $result[] = $role->getName();
+        }
+        return $result;
     }
 
 }

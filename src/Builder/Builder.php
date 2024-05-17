@@ -43,21 +43,19 @@ class Builder
 
     public function getMany(BaseModel $parent, string $related, string $tableName, string $relatedKey, string $parentKey): array|null
     {
-        $pivotData = $this->connection->readWhere($tableName, [$parentKey => $parent->getId()]);
-
-        if (is_null($pivotData)) {
-            return null;
-        }
+        $pivotData = $this->connection->read($tableName);
 
         foreach ($pivotData as $row) {
-            $value = $this->connection->readWhere($related::getTable(), ['id' => $row[$relatedKey]]);
-            $result[] = $value[0];
+            if ($row[$parentKey] === $parent->getId()) {
+                $dbData = $this->connection->readWhere($related::getTable(), ['id' => $row[$relatedKey]]);
+                $result[] = (new $related())->fillFromDb($dbData);
+            }
         }
 
         return $result;
     }
 
-    public function setRelated(BaseModel $parent, int $relatedValue, string $tableName, string $relatedKey, string $parentKey): void
+    public function createRelated(BaseModel $parent, int $relatedValue, string $tableName, string $relatedKey, string $parentKey): void
     {
         $this->connection->create($tableName, [$parentKey => $parent->getId(), $relatedKey => $relatedValue]);
     }
