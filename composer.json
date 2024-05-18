@@ -3,7 +3,8 @@
   "require": {
     "php": "^8.1.2",
     "ext-mysqli": "*",
-    "ext-pdo": "*"
+    "ext-pdo": "*",
+    "nesbot/carbon": "^3.3"
   },
   "autoload": {
     "psr-4": {
