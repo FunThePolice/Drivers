@@ -6,7 +6,6 @@ use App\Database\Drivers\Contracts\IDriver;
 use App\Helpers\MyConfigHelper;
 use ReflectionClass;
 use ReflectionException;
-use App\Database\Drivers\PDO\PdoDriver;
 
 class DriverFactory
 {

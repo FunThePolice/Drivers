@@ -34,7 +34,7 @@ $mySession = new MySessionHelper();
 
 
 $request = $_SERVER['PATH_INFO'];
-
+Dumper::dd(Carbon::today()->format('Y_m_d_'));
 switch ($request) {
     case '' :
         require __DIR__.'/../src/Views/welcome.php';

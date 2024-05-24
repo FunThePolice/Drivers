@@ -5,7 +5,6 @@ namespace App\Model;
 use App\Builder\Builder;
 use App\Factories\DriverFactory;
 use App\Helpers\Dumper;
-use App\Helpers\MyConfigHelper;
 
 abstract class BaseModel
 {
@@ -75,19 +74,6 @@ abstract class BaseModel
         $this->getBuilder()->create(static::getTable(), $this->toArray());
     }
 
-    public function createPair(string $child, array $data): void
-    {
-        $table = sprintf('%s_%s', static::getTable(), $child);
-        $this->getBuilder()->create($table, $data);
-    }
-
-    public function getPair(string $child, array $condition): array|null
-    {
-        $table = sprintf('%s_%s', static::getTable(), $child);
-
-        return $this->getBuilder()->readWhere($table, $condition);
-    }
-
     public function all(): array
     {
         $dbData = $this->getBuilder()->read(static::getTable());
@@ -113,7 +99,6 @@ abstract class BaseModel
 
     public function update(array $condition): void
     {
-        Dumper::dd($this->toArray());
         $this->getBuilder()->update(static::getTable(), $this->toArray(), $condition);
     }
 

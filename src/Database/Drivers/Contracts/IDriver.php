@@ -17,4 +17,6 @@ interface IDriver
 
     public function delete(string $table, array $condition): void;
 
+    public function runQuery(string $query, array $params = []): bool|array|null;
+
 }

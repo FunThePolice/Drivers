@@ -106,4 +106,8 @@ class MySqlDriver extends BaseDriver implements IDriver
         $stmt->execute();
     }
 
+    public function runQuery(string $query, array $params = []): bool|array|null
+    {
+        return $this->db->query($query);
+    }
 }
