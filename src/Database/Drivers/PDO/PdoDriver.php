@@ -99,6 +99,6 @@ class PdoDriver extends BaseDriver implements IDriver
 
     public function runQuery(string $query, array $params = []): bool|array|null
     {
-        return $this->db->query($query)->fetch(PDO::FETCH_ASSOC);
+        return $this->db->query($query)->fetchAll(PDO::FETCH_ASSOC);
     }
 }

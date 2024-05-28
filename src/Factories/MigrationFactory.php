@@ -19,7 +19,7 @@ class MigrationFactory
         $reflectionClass = new ReflectionClass($handlerClassName);
 
         if (!$reflectionClass->isInstantiable()) {
-            throw new CouldNotInstantiateHandlerClassException();
+            throw new CouldNotInstantiateMigrationHandlerClassException();
         }
 
         return new $handlerClassName();

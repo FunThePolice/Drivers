@@ -2,15 +2,15 @@
 
 return [
 
-    'selected' => 'database',
+    'selected' => 'local',
 
     'local' => [
-        'path' => '/home/funp/PhpstormProjects/Model-Pages/src/Migration/LocalMigration/LocalMigrationInfo',
+        'path' => dirname(__DIR__) . '/Migration/LocalMigration/LocalMigrationInfo',
         'handler' => \App\Migration\LocalMigration\LocalMigration::class
     ],
 
     'database' => [
-        'path' => '/home/funp/PhpstormProjects/Model-Pages/src/Migration/DbMigration/DbMigrationInfo',
+        'path' => dirname(__DIR__) . '/Migration/DbMigration/DbMigrationInfo',
         'handler' => \App\Migration\DbMigration\DbMigration::class
     ]
 

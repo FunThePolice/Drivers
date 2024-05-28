@@ -2,74 +2,103 @@
 
 namespace App\Migration\LocalMigration;
 
-use App\Helpers\MyConfigHelper;
 use App\Migration\BaseMigration;
 use App\Migration\Contracts\IMigrate;
-use Carbon\Carbon;
+use App\Migration\Migration;
 
 class LocalMigration extends BaseMigration implements IMigrate
 {
 
+    /**
+     * @throws \Exception
+     */
     public function create(string $migrationName): void
     {
-        $fileName = Carbon::today()->format('Y_m_d_') . $migrationName;
-
-        if (!file_exists($this->getPath($fileName))) {
-            $this->createMigrationFile($fileName);
-            $this->addRecord($fileName);
-        } else {
-            throw new \Exception('File already exists.');
-        }
+        $this->createMigration($migrationName);
     }
 
     public function migrateUp(): void
     {
-        $info = $this->getInfo();
-
-        foreach ($info['non-applied'] as $batch => $migrations) {
-            if ($info['current-batch'] === $batch) {
-
-                foreach ($migrations as $migrationName) {
-                    $migration = require __DIR__ . '/../../Migration/migrations/' . $migrationName . '.php';
-                    $migration->up();
-                }
-
-                $info['applied'][$batch] = $migrations;
-                unset($info['non-applied'][$batch]);
-                $info['current-batch']++;
-                $this->storeInfo($info);
-            }
-
-        }
+        $this->applyMigrations();
     }
 
     public function migrateDown(): void
     {
-        $info = $this->getInfo();
-        $currentBatch = --$info['current-batch'];
+        $this->rollbackMigrations();
+    }
 
-        foreach ($info['applied'] as $batch => $migrations) {
-            if ($currentBatch === $batch) {
+    protected function getLastBatch(): int
+    {
+        $info = $this->readMigrationFile();
 
-                foreach (array_reverse($migrations) as $migrationName) {
-                    $migration = require __DIR__ . '/../../Migration/migrations/' . $migrationName . '.php';
-                    $migration->down();
-                }
+        if (!isset($info['applied'])) {
+            $info['applied'] = [];
+        }
 
-                $info['non-applied'][$batch] = $migrations;
-                unset($info['applied'][$batch]);
-                $this->storeInfo($info);
-            }
+        if (!empty($info['applied'])) {
+            return max(array_keys($info['applied']));
+        }  else {
+            return 1;
+        }
 
+    }
+
+    protected function getCurrentBatch(): int
+    {
+        $info = $this->readMigrationFile();
+
+        if (!isset($info['migrations'])) {
+            $info['migrations'] = [];
+        }
+
+        if (!empty($info['migrations'])) {
+            return max(array_keys($info['migrations']));
+        }  else {
+            return $this->getLastBatch() + 1;
         }
     }
 
-    protected function addRecord(string $fileName): void
+    protected function applyMigration(Migration $migration): void
     {
-        $info = $this->getInfo();
-        $batch = $info['current-batch'] ?? 1;
-        $info['non-applied'][$batch][] = $fileName;
-        $this->storeInfo($info);
+        $info = $this->readMigrationFile();
+
+        if (!isset($info['applied'][$migration->getBatch()])) {
+            $info['applied'][$migration->getBatch()] = [];
+        }
+
+        $info['applied'][$migration->getBatch()][] =
+            [
+                'migration'=> $migration->getMigrationName(),
+                'batch' => $migration->getBatch(),
+            ];
+
+        $this->writeMigrationFile($info);
+    }
+
+    protected function rollbackMigrationsByBatch(int $batch): void
+    {
+        $info = $this->readMigrationFile();
+
+        if (!isset($info['applied'][$batch])) {
+            throw new \Exception('Batch does not exist in applied migrations');
+        }
+
+        unset($info['applied'][$batch]);
+        $this->writeMigrationFile($info);
+    }
+
+    protected function getLatestMigrations(): array
+    {
+
+        if (!isset($this->readMigrationFile()['applied'][$this->getLastBatch()])) {
+            throw new \Exception('No migrations found on given batch');
+        }
+
+        foreach ($this->readMigrationFile()['applied'][$this->getLastBatch()] as $migration) {
+            $result[] = new Migration($migration['batch'], $migration['migration']);
+        }
+
+        return $result;
     }
 
 }

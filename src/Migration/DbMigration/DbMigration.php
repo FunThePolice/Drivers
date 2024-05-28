@@ -4,100 +4,73 @@ namespace App\Migration\DbMigration;
 
 use App\Builder\Builder;
 use App\Factories\DriverFactory;
-use App\Helpers\MyConfigHelper;
 use App\Migration\BaseMigration;
 use App\Migration\Contracts\IMigrate;
-use Carbon\Carbon;
+use App\Migration\Migration;
 
 class DbMigration extends BaseMigration implements IMigrate
 {
 
-    public function create(string $migrationName)
+    /**
+     * @throws \Exception
+     */
+    public function create(string $migrationName): void
     {
-        $fileName = Carbon::today()->format('Y_m_d_') . $migrationName;
-
-        if (!file_exists($this->getPath($fileName))) {
-            $this->createMigrationFile($fileName);
-            $this->addRecordToDb($fileName);
-            $this->addRecord($fileName);
-        } else {
-            throw new \Exception('File already exists.');
-        }
-
+        $this->createMigration($migrationName);
     }
 
     public function migrateUp(): void
     {
-        $info = $this->getInfo();
-
-        foreach ($info['migrations'] as $batch => $migrations) {
-            if ($info['current-batch'] === $batch) {
-
-                foreach ($migrations as $migrationName) {
-                    $migration = require __DIR__ . '/../../Migration/migrations/' . $migrationName . '.php';
-                    $migration->up();
-                }
-
-                unset($info['migrations'][$batch]);
-                $info['current-batch']++;
-                $this->storeInfo($info);
-            }
-
-        }
+        $this->applyMigrations();
     }
 
     public function migrateDown(): void
     {
-        $latestMigrations = $this->getLatestMigrations();
-
-        foreach ($latestMigrations['migrations'] as $batch => $migrations) {
-            if ($this->getLatestBatch() === $batch) {
-
-                foreach (array_reverse($migrations) as $migrationName) {
-                    $migration = require __DIR__ . '/../../Migration/migrations/' . $migrationName . '.php';
-                    $migration->down();
-                }
-
-                $info = $this->getInfo();
-                $info['migrations'][$batch] = $migrations;
-                $info['current-batch']--;
-                $this->storeInfo($info);
-            }
-        }
+        $this->rollbackMigrations();
     }
 
     protected function getLatestMigrations(): array
     {
-       $migrations = $this->getBuilder()->read('migrations');
-       foreach ($migrations as $migration) {
-           if ($migration['batch'] === $this->getLatestBatch()) {
-               $result['migrations'][$this->getLatestBatch()][] = $migration['migration'];
-           }
-       }
-       return $result;
-    }
-    protected function addRecordToDb(string $migration): void
-    {
-        $info = $this->getInfo();
-        $data = [
-            'migration' => $migration,
-            'batch' => $info['current-batch']
-        ];
-        $this->getBuilder()->create('migrations', $data);
+        $rows = $this->getBuilder()->rawQuery('select * from migrations where batch=' . $this->getLastBatch());
+        foreach ($rows as $row) {
+            $result[] = new Migration($row['batch'], $row['migration']);
+        }
+
+        return $result;
     }
 
-    protected function getLatestBatch(): int
+    protected function applyMigration(Migration $migration): void
+    {
+        $this->getBuilder()->create(
+            'migrations',
+            [
+                'migration' => $migration->getMigrationName(),
+                'batch' => $migration->getBatch(),
+            ]
+        );
+    }
+
+    protected function rollbackMigrationsByBatch(int $batch): void
+    {
+        $this->getBuilder()->rawQuery('delete from migrations where batch=' . $batch);
+    }
+
+    protected function getLastBatch(): int
     {
         $row = $this->getBuilder()->rawQuery('select MAX(batch) from migrations');
-        return $row['MAX(batch)'];
+        return $row['MAX(batch)'] ?? 1;
     }
 
-    protected function addRecord(string $fileName): void
+    protected function getCurrentBatch(): int
     {
-        $info = $this->getInfo();
-        $batch = $info['current-batch'] ?? 1;
-        $info['migrations'][$batch][] = $fileName;
-        $this->storeInfo($info);
+        $latestBatch = $this->getLastBatch();
+
+        if ($latestBatch === 1) {
+            return $latestBatch;
+        } else {
+            return ++$latestBatch;
+        }
+
     }
 
     protected function getBuilder(): Builder
