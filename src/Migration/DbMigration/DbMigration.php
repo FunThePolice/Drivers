@@ -29,6 +29,11 @@ class DbMigration extends BaseMigration implements IMigrate
         $this->rollbackMigrations();
     }
 
+    public function migrateFresh(): void
+    {
+        $this->refreshMigrations();
+    }
+
     protected function getLatestMigrations(): array
     {
         $rows = $this->getBuilder()->rawQuery('select * from migrations where batch=' . $this->getLastBatch());
@@ -39,11 +44,20 @@ class DbMigration extends BaseMigration implements IMigrate
         return $result;
     }
 
+    protected function getAppliedMigrations(): array
+    {
+        $rows = $this->getBuilder()->rawQuery('select * from migrations');
+        foreach ($rows as $row) {
+            $result[] = new Migration($row['batch'], $row['migration']);
+        }
+
+        return $result;
+    }
+
     protected function applyMigration(Migration $migration): void
     {
         $this->getBuilder()->create(
-            'migrations',
-            [
+            'migrations', [
                 'migration' => $migration->getMigrationName(),
                 'batch' => $migration->getBatch(),
             ]
@@ -58,24 +72,28 @@ class DbMigration extends BaseMigration implements IMigrate
     protected function getLastBatch(): int
     {
         $row = $this->getBuilder()->rawQuery('select MAX(batch) from migrations');
-        return $row['MAX(batch)'] ?? 1;
+        return array_shift($row)['MAX(batch)'] ?? 0;
     }
 
     protected function getCurrentBatch(): int
     {
         $latestBatch = $this->getLastBatch();
 
-        if ($latestBatch === 1) {
-            return $latestBatch;
-        } else {
-            return ++$latestBatch;
-        }
-
+        return ++$latestBatch;
     }
 
     protected function getBuilder(): Builder
     {
         return new Builder(DriverFactory::create());
+    }
+
+    protected function getAppliedMigrationsList(): array
+    {
+        foreach ($this->getBuilder()->rawQuery('select migration from migrations') as $migration) {
+            $result[] = $migration['migration'];
+        }
+
+        return $result ?? [];
     }
 
 }

@@ -11,4 +11,6 @@ interface IMigrate
 
     public function migrateDown();
 
+    public function migrateFresh();
+
 }

@@ -2,7 +2,7 @@
 
 return [
 
-    'selected' => 'local',
+    'selected' => 'database',
 
     'local' => [
         'path' => dirname(__DIR__) . '/Migration/LocalMigration/LocalMigrationInfo',
@@ -10,7 +10,6 @@ return [
     ],
 
     'database' => [
-        'path' => dirname(__DIR__) . '/Migration/DbMigration/DbMigrationInfo',
         'handler' => \App\Migration\DbMigration\DbMigration::class
     ]
 

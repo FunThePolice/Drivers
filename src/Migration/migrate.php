@@ -16,5 +16,8 @@ switch ($argv[1]) {
         case 'migrate:rollback':
             $migration->migrateDown();
             break;
+            case 'migrate:fresh':
+        $migration->migrateFresh();
+        break;
 
 }

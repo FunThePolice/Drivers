@@ -2,6 +2,7 @@
 
 namespace App\Migration\LocalMigration;
 
+use App\Helpers\MyConfigHelper;
 use App\Migration\BaseMigration;
 use App\Migration\Contracts\IMigrate;
 use App\Migration\Migration;
@@ -27,23 +28,12 @@ class LocalMigration extends BaseMigration implements IMigrate
         $this->rollbackMigrations();
     }
 
-    protected function getLastBatch(): int
+    public function migrateFresh(): void
     {
-        $info = $this->readMigrationFile();
-
-        if (!isset($info['applied'])) {
-            $info['applied'] = [];
-        }
-
-        if (!empty($info['applied'])) {
-            return max(array_keys($info['applied']));
-        }  else {
-            return 1;
-        }
-
+        $this->refreshMigrations();
     }
 
-    protected function getCurrentBatch(): int
+    protected function getLastBatch(): int
     {
         $info = $this->readMigrationFile();
 
@@ -52,26 +42,32 @@ class LocalMigration extends BaseMigration implements IMigrate
         }
 
         if (!empty($info['migrations'])) {
-            return max(array_keys($info['migrations']));
+            foreach ($info['migrations'] as $migration) {
+                $batches[] = $migration['batch'];
+            }
+            return max($batches);
         }  else {
-            return $this->getLastBatch() + 1;
+            return 0;
         }
+
+    }
+
+    protected function getCurrentBatch(): int
+    {
+      $lastBatch = $this->getLastBatch();
+
+      return ++$lastBatch;
     }
 
     protected function applyMigration(Migration $migration): void
     {
         $info = $this->readMigrationFile();
 
-        if (!isset($info['applied'][$migration->getBatch()])) {
-            $info['applied'][$migration->getBatch()] = [];
+        if (!isset($info['migrations'])) {
+            $info['migrations'] = [];
         }
 
-        $info['applied'][$migration->getBatch()][] =
-            [
-                'migration'=> $migration->getMigrationName(),
-                'batch' => $migration->getBatch(),
-            ];
-
+        $info['migrations'][] = $migration;
         $this->writeMigrationFile($info);
     }
 
@@ -79,26 +75,84 @@ class LocalMigration extends BaseMigration implements IMigrate
     {
         $info = $this->readMigrationFile();
 
-        if (!isset($info['applied'][$batch])) {
+        if (!isset($info['migrations'])) {
             throw new \Exception('Batch does not exist in applied migrations');
         }
 
-        unset($info['applied'][$batch]);
+        foreach ($info['migrations'] as $migration) {
+            if ($migration['batch'] === $batch) {
+                foreach (array_keys($info['migrations'], $migration) as $key) {
+                    unset($info['migrations'][$key]);
+                }
+            }
+        }
+
         $this->writeMigrationFile($info);
     }
 
     protected function getLatestMigrations(): array
     {
 
-        if (!isset($this->readMigrationFile()['applied'][$this->getLastBatch()])) {
+        if (!isset($this->readMigrationFile()['migrations'])) {
             throw new \Exception('No migrations found on given batch');
         }
 
-        foreach ($this->readMigrationFile()['applied'][$this->getLastBatch()] as $migration) {
+        foreach ($this->readMigrationFile()['migrations'] as $migration) {
+            if ($migration['batch'] === $this->getLastBatch()) {
+                $result[] = new Migration($migration['batch'], $migration['migration']);
+            }
+        }
+
+        return $result;
+    }
+
+    protected function getAppliedMigrations(): array
+    {
+        if (!isset($this->readMigrationFile()['migrations'])) {
+            throw new \Exception('No migrations found on given batch');
+        }
+
+        foreach ($this->readMigrationFile()['migrations'] as $migration) {
             $result[] = new Migration($migration['batch'], $migration['migration']);
         }
 
         return $result;
+    }
+
+    protected function writeMigrationFile(array $data): void
+    {
+        if (!isset(MyConfigHelper::getMigrationConfig()['path'])) {
+            throw new \Exception('File path for migration info is not defined.');
+        }
+
+        file_put_contents(
+            MyConfigHelper::getMigrationConfig()['path'],
+            json_encode($data, JSON_PRETTY_PRINT),
+        );
+    }
+
+    protected function readMigrationFile(): array
+    {
+        if (!isset(MyConfigHelper::getMigrationConfig()['path'])) {
+            throw new \Exception('File path for migration info is not defined.');
+        }
+
+        return json_decode(file_get_contents(MyConfigHelper::getMigrationConfig()['path']) , true);
+    }
+
+    protected function getAppliedMigrationsList(): array
+    {
+        $info = $this->readMigrationFile();
+
+        if (!isset($info['migrations'])) {
+            $info['migrations'] = [];
+        }
+
+        foreach ($info['migrations'] as $migration) {
+            $result[] = $migration['migration'];
+        }
+
+        return $result ?? [];
     }
 
 }

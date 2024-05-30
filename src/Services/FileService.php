@@ -20,4 +20,13 @@ class FileService
         return dirname(__DIR__) . $path . $fileName . '.php';
     }
 
+    public static function getPath(string $path): string
+    {
+        return dirname(__DIR__) . $path;
+    }
+
+    public static function getDirContent(string $path): array
+    {
+        return array_values(array_diff(scandir(static::getPath($path)), array('..', '.')));
+    }
 }

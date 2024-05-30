@@ -2,65 +2,79 @@
 
 namespace App\Migration;
 
-use App\Helpers\MyConfigHelper;
+use App\Exeptions\NoMigrationsToApply;
 use App\Services\FileService;
 use Carbon\Carbon;
 
 abstract class BaseMigration
 {
 
+    const MIGRATION_TEMPLATE_PATH = '/Migration/migrationTemplate.php';
+
+    const BASE_MIGRATION_PATH = '/Migration/migrations/';
+
     /**
      * @throws \Exception
      */
     protected function createMigration(string $migrationName): void
     {
-
         if (!file_exists($this->getPathToMigrations($migrationName))) {
             $this->createMigrationFile($migrationName);
-            $this->createMigrationInfo($this->getCurrentBatch(), $migrationName);
         } else {
             throw new \Exception('File already exists.');
         }
     }
 
-    public function applyMigrations(): void
+    protected function applyMigrations(): void
     {
-        foreach ($this->getMigrationsByBatch($this->getCurrentBatch()) as $migrationInfo) {
-            $migrationFile = $this->getMigrationFile($migrationInfo->getMigrationName());
+        foreach ($this->getMigrationsToApply() as $migration) {
+            $migrationFile = $this->getMigrationFile($migration->getMigrationName());
             $migrationFile->up();
-            $this->applyMigration($migrationInfo);
-            $this->removeBatchFromInfoFile($migrationInfo->getBatch());
+            $this->applyMigration($migration);
         }
     }
 
-    public function rollbackMigrations(): void
+    protected function rollbackMigrations(): void
     {
-
         foreach (array_reverse($this->getLatestMigrations()) as $migrationInfo) {
             $migrationFile = $this->getMigrationFile($migrationInfo->getMigrationName());
             $migrationFile->down();
-        }
-
-        foreach ($this->getLatestMigrations() as $migrationInfo) {
-            $this->addMigrationToInfoFile($migrationInfo);
             $this->rollbackMigrationsByBatch($migrationInfo->getBatch());
         }
+    }
 
+    protected function refreshMigrations(): void
+    {
+        foreach ($this->getAppliedMigrations() as $migrationInfo) {
+            $migrationFile = $this->getMigrationFile($migrationInfo->getMigrationName());
+            $migrationFile->up();
+        }
+    }
+
+    protected function getMigrationFilesName(): array
+    {
+        $content = FileService::getDirContent(static::BASE_MIGRATION_PATH);
+        foreach ($content as $file) {
+            $file = substr($file, 0 , -4);
+            $result[] = $file;
+        }
+
+        return $result;
     }
 
     protected function getTemplate(): string
     {
-        return FileService::getFile('/Migration/migrationTemplate.php');
+        return FileService::getFile(static::MIGRATION_TEMPLATE_PATH);
     }
 
     protected function getPathToMigrations(string $migrationName): string
     {
-        return FileService::getFilePath('/Migration/migrations/', $this->createFileName($migrationName));
+        return FileService::getFilePath(static::BASE_MIGRATION_PATH, $this->createFileName($migrationName));
     }
 
     protected function getMigrationFile(string $migrationName)
     {
-        return FileService::getFile('/Migration/migrations/' . $migrationName . '.php');
+        return FileService::getFile(static::BASE_MIGRATION_PATH . $migrationName . '.php');
     }
 
     protected function createMigrationFile(string $migrationName): void
@@ -70,81 +84,21 @@ abstract class BaseMigration
 
     protected function createFileName($migrationName): string
     {
-        return Carbon::today()->format('Y_m_d_') . $migrationName;
+        return Carbon::now()->format('Y_m_d_His_') . $migrationName;
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function getMigrationsByBatch(int $batch): array
+    protected function getMigrationsToApply(): array
     {
-        $data = $this->readMigrationFile();
+        $migrations = array_diff($this->getMigrationFilesName(), $this->getAppliedMigrationsList());
 
-        if (!isset($data['migrations'])) {
-            $data['migrations'] = [];
+        if (empty($migrations)) {
+            throw new NoMigrationsToApply();
         }
 
-        if (!isset($data['migrations'][$batch])) {
-            throw new \Exception('No migrations were found for batch ' . $batch);
-        }
-
-        foreach ($data['migrations'][$batch] as $migration) {
-            if ($migration['batch'] === $batch) {
-                $result[] = new Migration($batch, $migration['migrationName']);
-            }
+        foreach ($migrations as $migration) {
+            $result[] = new Migration($this->getCurrentBatch(), $migration);
         }
 
         return $result;
     }
-
-    protected function writeMigrationFile(array $data): void
-    {
-        if (!isset(MyConfigHelper::getMigrationConfig()['path'])) {
-            throw new \Exception('File path for migration info is not defined.');
-        }
-
-        file_put_contents(
-            MyConfigHelper::getMigrationConfig()['path'],
-            json_encode($data),
-        );
-    }
-
-    protected function readMigrationFile(): array
-    {
-        if (!isset(MyConfigHelper::getMigrationConfig()['path'])) {
-            throw new \Exception('File path for migration info is not defined.');
-        }
-
-        return json_decode(file_get_contents(MyConfigHelper::getMigrationConfig()['path']) , true);
-    }
-
-    protected function addMigrationToInfoFile(Migration $migration): void
-    {
-       $file = $this->readMigrationFile();
-
-       if (!isset($file['migrations'][$migration->getBatch()])) {
-           $file['migrations'][$migration->getBatch()] = [];
-       }
-
-        $file['migrations'][$migration->getBatch()][] = $migration;
-        $this->writeMigrationFile($file);
-    }
-
-    protected function createMigrationInfo(int $batch, string $migrationName): void
-    {
-        $this->addMigrationToInfoFile(new Migration($batch, $this->createFileName($migrationName)));
-    }
-
-    protected function removeBatchFromInfoFile(int $batch): void
-    {
-        $file = $this->readMigrationFile();
-
-        if (!isset($file['migrations'][$batch])) {
-            throw new \Exception('Given batch does not exist in migration file.');
-        }
-
-        unset($file['migrations'][$batch]);
-        $this->writeMigrationFile($file);
-    }
-
 }

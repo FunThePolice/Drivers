@@ -7,12 +7,12 @@ class Migration
 
     public readonly int $batch;
 
-    public readonly string $migrationName;
+    public readonly string $migration;
 
-    public function __construct(int $batch, string $migrationName)
+    public function __construct(int $batch, string $migration)
     {
         $this->batch = $batch;
-        $this->migrationName = $migrationName;
+        $this->migration = $migration;
     }
 
     public function getBatch(): int
@@ -22,7 +22,7 @@ class Migration
 
     public function getMigrationName(): string
     {
-        return $this->migrationName;
+        return $this->migration;
     }
 
 }
