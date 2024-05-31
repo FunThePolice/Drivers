@@ -3,7 +3,6 @@
 namespace App\Builder;
 
 use App\Database\Drivers\Contracts\IDriver;
-use App\Helpers\Dumper;
 use App\Model\BaseModel;
 
 class Builder
@@ -58,6 +57,11 @@ class Builder
     public function createRelated(BaseModel $parent, int $relatedValue, string $tableName, string $relatedKey, string $parentKey): void
     {
         $this->connection->create($tableName, [$parentKey => $parent->getId(), $relatedKey => $relatedValue]);
+    }
+
+    public function rawQuery(string $sql, array $params = []): bool|array|null
+    {
+        return $this->connection->runQuery($sql, $params);
     }
 
 }
